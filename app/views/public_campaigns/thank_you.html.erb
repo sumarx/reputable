@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Thank You - <%= @location.name %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  </head>
+
+  <body class="bg-gray-50 font-sans antialiased">
+    <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div class="max-w-md w-full space-y-8">
+        <div class="text-center">
+          <div class="mx-auto h-12 w-12 bg-green-600 rounded-full flex items-center justify-center">
+            <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+          </div>
+          
+          <h2 class="mt-6 text-3xl font-extrabold text-gray-900">
+            Thank You!
+          </h2>
+          
+          <div class="mt-6 bg-white py-8 px-6 shadow rounded-lg sm:px-10">
+            <p class="text-gray-600 text-lg leading-relaxed">
+              Thank you for taking the time to share your feedback with us. We value your input and will use it to improve our service at <strong class="text-gray-900"><%= @location.name %></strong>.
+            </p>
+            
+            <% if @campaign_response.customer_name.present? || @campaign_response.customer_phone.present? %>
+              <div class="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <p class="text-blue-800 text-sm">
+                  <strong>We'll be in touch!</strong><br>
+                  Our team will reach out to you soon to address your concerns and make things right.
+                </p>
+              </div>
+            <% end %>
+            
+            <p class="mt-6 text-sm text-gray-500 text-center">
+              Your feedback helps us provide better service to all our customers.
+            </p>
+          </div>
+        </div>
+
+        <div class="text-center">
+          <p class="text-xs text-gray-500">
+            Powered by <strong class="text-indigo-600">RepuTable</strong>
+          </p>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

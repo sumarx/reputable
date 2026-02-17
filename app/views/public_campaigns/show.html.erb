@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Leave Feedback - <%= @location.name %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  </head>
+
+  <body class="bg-gray-50 font-sans antialiased">
+    <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div class="max-w-md w-full space-y-8">
+        <div>
+          <div class="mx-auto h-12 w-12 bg-indigo-600 rounded-full flex items-center justify-center">
+            <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path>
+            </svg>
+          </div>
+          <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+            How was your experience at
+          </h2>
+          <h3 class="mt-2 text-center text-2xl font-bold text-indigo-600">
+            <%= @location.name %>?
+          </h3>
+          <p class="mt-2 text-center text-sm text-gray-600">
+            Your feedback helps us improve our service
+          </p>
+        </div>
+
+        <div class="bg-white py-8 px-6 shadow rounded-lg sm:px-10">
+          <%= form_with model: [@campaign, @campaign_response], url: public_campaign_respond_path(@campaign.slug), local: true, class: "space-y-6" do |form| %>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-4">Rate your experience</label>
+              <div class="flex justify-center space-x-2">
+                <% (1..5).each do |rating| %>
+                  <label class="cursor-pointer" data-rating="<%= rating %>">
+                    <%= form.radio_button :rating, rating, 
+                        class: "sr-only peer", 
+                        id: "rating_#{rating}",
+                        required: true,
+                        data: { 
+                          controller: "rating",
+                          action: "change->rating#updateStars"
+                        } %>
+                    <svg class="w-8 h-8 text-gray-300 hover:text-yellow-400 peer-checked:text-yellow-400" 
+                         fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                    </svg>
+                  </label>
+                <% end %>
+              </div>
+              <div class="text-center mt-2">
+                <span id="rating-text" class="text-sm text-gray-500">Click to rate</span>
+              </div>
+            </div>
+
+            <div>
+              <%= form.label :feedback, "Tell us more about your experience (optional)", class: "block text-sm font-medium text-gray-700" %>
+              <%= form.text_area :feedback, 
+                  rows: 4,
+                  placeholder: "What did you like? What could we improve?",
+                  class: "mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" %>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <%= form.label :customer_name, "Your Name (optional)", class: "block text-sm font-medium text-gray-700" %>
+                <%= form.text_field :customer_name, 
+                    placeholder: "Your name",
+                    class: "mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" %>
+              </div>
+
+              <div>
+                <%= form.label :customer_phone, "Phone (optional)", class: "block text-sm font-medium text-gray-700" %>
+                <%= form.telephone_field :customer_phone, 
+                    placeholder: "Your phone",
+                    class: "mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" %>
+              </div>
+            </div>
+
+            <div>
+              <%= form.submit "Submit Feedback", class: "group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+            </div>
+          <% end %>
+        </div>
+
+        <div class="text-center">
+          <p class="text-xs text-gray-500">
+            Powered by <strong class="text-indigo-600">RepuTable</strong>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        const stars = document.querySelectorAll('[data-rating]');
+        const ratingText = document.getElementById('rating-text');
+        const ratings = {
+          1: "Poor",
+          2: "Fair", 
+          3: "Good",
+          4: "Very Good",
+          5: "Excellent"
+        };
+
+        stars.forEach(star => {
+          star.addEventListener('mouseover', function() {
+            const rating = this.dataset.rating;
+            highlightStars(rating);
+            ratingText.textContent = ratings[rating];
+          });
+
+          star.addEventListener('click', function() {
+            const rating = this.dataset.rating;
+            ratingText.textContent = ratings[rating];
+          });
+        });
+
+        document.addEventListener('mouseleave', function(e) {
+          if (e.target.closest('.flex')) return;
+          resetStars();
+        });
+
+        function highlightStars(rating) {
+          stars.forEach((star, index) => {
+            const svg = star.querySelector('svg');
+            if (index + 1 <= rating) {
+              svg.classList.remove('text-gray-300');
+              svg.classList.add('text-yellow-400');
+            } else {
+              svg.classList.remove('text-yellow-400');
+              svg.classList.add('text-gray-300');
+            }
+          });
+        }
+
+        function resetStars() {
+          const checked = document.querySelector('input[name="campaign_response[rating]"]:checked');
+          if (checked) {
+            highlightStars(checked.value);
+            ratingText.textContent = ratings[checked.value];
+          } else {
+            stars.forEach(star => {
+              const svg = star.querySelector('svg');
+              svg.classList.remove('text-yellow-400');
+              svg.classList.add('text-gray-300');
+            });
+            ratingText.textContent = "Click to rate";
+          }
+        }
+      });
+    </script>
+  </body>
+</html>
