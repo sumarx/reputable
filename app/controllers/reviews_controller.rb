@@ -1,5 +1,5 @@
 class ReviewsController < ApplicationController
-  include Pagy::Backend
+  include Pagy::Method
   before_action :resume_session
   before_action :set_review, only: [:show, :generate_reply]
 
@@ -16,8 +16,11 @@ class ReviewsController < ApplicationController
   def generate_reply
     tone = params[:tone] || "professional"
     GenerateReplyJob.perform_later(@review, tone)
-    
-    redirect_to @review, notice: "AI reply drafts are being generated..."
+
+    respond_to do |format|
+      format.turbo_stream
+      format.html { redirect_to @review, notice: "AI reply drafts are being generated..." }
+    end
   end
 
   private

@@ -1,0 +1,81 @@
+<% content_for :page_title, "Import Reviews" %>
+
+<div class="space-y-6">
+  <div class="flex items-center justify-between">
+    <%= link_to "← Back to Reviews", reviews_path, class: "text-sm text-indigo-600 hover:text-indigo-500" %>
+  </div>
+
+  <!-- Single Review Import -->
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+    <h3 class="text-lg font-medium text-gray-900 mb-4">Paste a Review</h3>
+    <%= form_with url: review_imports_path, method: :post, class: "space-y-4" do %>
+      <input type="hidden" name="import_type" value="single">
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Location</label>
+          <%= select_tag :location_id, options_for_select(@locations.map { |l| [l.name, l.id] }), class: "w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm", required: true %>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Platform</label>
+          <%= select_tag :platform, options_for_select([["Google", "google"], ["Facebook", "facebook"], ["TripAdvisor", "tripadvisor"], ["Yelp", "yelp"]]), class: "w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm", required: true %>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Reviewer Name</label>
+          <input type="text" name="reviewer_name" required class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" placeholder="John Doe">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Rating</label>
+          <%= select_tag :rating, options_for_select([["5 Stars ★★★★★", 5], ["4 Stars ★★★★☆", 4], ["3 Stars ★★★☆☆", 3], ["2 Stars ★★☆☆☆", 2], ["1 Star ★☆☆☆☆", 1]]), class: "w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm", required: true %>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Date (optional)</label>
+          <input type="date" name="published_at" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Review Text</label>
+        <textarea name="body" rows="4" required class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" placeholder="Paste the review text here..."></textarea>
+      </div>
+
+      <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 cursor-pointer">
+        Import Review
+      </button>
+    <% end %>
+  </div>
+
+  <!-- CSV Import -->
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+    <h3 class="text-lg font-medium text-gray-900 mb-4">CSV Upload</h3>
+    <p class="text-sm text-gray-500 mb-4">
+      Upload a CSV file with columns: <code class="text-xs bg-gray-100 px-1 py-0.5 rounded">platform, reviewer_name, rating, body, published_at</code>
+    </p>
+
+    <%= form_with url: review_imports_path, method: :post, multipart: true, class: "space-y-4" do %>
+      <input type="hidden" name="import_type" value="csv">
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Location</label>
+        <%= select_tag :location_id, options_for_select(@locations.map { |l| [l.name, l.id] }), class: "w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm", required: true, id: "csv_location_id" %>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">CSV File</label>
+        <input type="file" name="csv_file" accept=".csv" required class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
+      </div>
+
+      <div class="flex items-center gap-4">
+        <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 cursor-pointer">
+          Upload CSV
+        </button>
+        <a href="data:text/csv;charset=utf-8,platform,reviewer_name,rating,body,published_at%0Agoogle,Jane Smith,5,Excellent service and great food!,2025-01-15%0Ayelp,John Doe,4,Really good experience overall.,2025-01-10" download="sample_reviews.csv" class="text-sm text-indigo-600 hover:text-indigo-500">
+          Download sample CSV
+        </a>
+      </div>
+    <% end %>
+  </div>
+</div>

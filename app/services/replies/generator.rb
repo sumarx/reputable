@@ -1,15 +1,17 @@
 class Replies::Generator
+  GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent".freeze
+
   def initialize(review, tone: "professional")
     @review = review
     @tone = tone
-    @client = OpenAI::Client.new(access_token: ENV['OPENAI_API_KEY'])
   end
 
   def call
-    return [] unless @review.body.present?
+    return fallback_replies unless @review.body.present?
+    return fallback_replies unless ENV["GEMINI_API_KEY"].present?
 
     begin
-      response = generate_with_openai
+      response = generate_with_gemini
       parse_response(response)
     rescue => error
       Rails.logger.error "Reply generation failed for review #{@review.id}: #{error.message}"
@@ -19,17 +21,16 @@ class Replies::Generator
 
   private
 
-  def generate_with_openai
-    @client.chat(
-      parameters: {
-        model: "gpt-4o-mini",
-        messages: [{
-          role: "user",
-          content: reply_prompt
-        }],
-        temperature: 0.7
-      }
-    )
+  def generate_with_gemini
+    uri = URI("#{GEMINI_URL}?key=#{ENV['GEMINI_API_KEY']}")
+    request = Net::HTTP::Post.new(uri, "Content-Type" => "application/json")
+    request.body = {
+      contents: [{ parts: [{ text: reply_prompt }] }],
+      generationConfig: { temperature: 0.7 }
+    }.to_json
+
+    response = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true) { |http| http.request(request) }
+    JSON.parse(response.body)
   end
 
   def reply_prompt
@@ -44,30 +45,27 @@ class Replies::Generator
       Customer: #{@review.reviewer_name || 'A valued customer'}
       
       Generate 3 different reply options in #{@tone} tone. Each reply should:
-      - Thank the customer
-      - Address their specific concerns if negative
-      - Invite them back or encourage others if positive
+      - Thank the customer by name if available
+      - Address their specific points (praise or concerns)
       - Be authentic and not overly promotional
-      - Be 50-150 words long
+      - Be 50-120 words long
+      - If the review is in a non-English language, reply in the same language
       
-      Respond with valid JSON:
-      {
-        "replies": [
-          "First reply option...",
-          "Second reply option...",
-          "Third reply option..."
-        ]
-      }
+      Respond with ONLY valid JSON, no markdown, no explanation:
+      {"replies": ["First reply...", "Second reply...", "Third reply..."]}
     PROMPT
   end
 
   def parse_response(response)
-    content = response.dig("choices", 0, "message", "content")
-    data = JSON.parse(content)
-    
-    Array(data["replies"]).first(3).compact.select(&:present?)
+    content = response.dig("candidates", 0, "content", "parts", 0, "text")
+    cleaned = content.to_s.gsub(/```json\s*/, "").gsub(/```\s*/, "").strip
+    data = JSON.parse(cleaned)
+
+    replies = Array(data["replies"]).first(3).compact.map do |r|
+      r.is_a?(Hash) ? (r["reply"] || r["text"] || r.values.first) : r
+    end.select(&:present?)
   rescue JSON::ParserError => error
-    Rails.logger.error "Failed to parse OpenAI reply response: #{error.message}"
+    Rails.logger.error "Failed to parse Gemini reply response: #{error.message}"
     fallback_replies
   end
 
@@ -79,20 +77,20 @@ class Replies::Generator
     when "positive"
       [
         "Thank you so much for your wonderful review! We're thrilled you had such a great experience at #{location_name}. We look forward to welcoming you back soon!",
-        "Hi #{customer_name}! Your kind words mean the world to us. Thank you for taking the time to share your positive experience at #{location_name}.",
+        "Hi #{customer_name}! Your kind words mean the world to us. Thank you for sharing your positive experience at #{location_name}.",
         "Thank you for the fantastic review! It's customers like you who make our day at #{location_name}. We can't wait to serve you again!"
       ]
     when "negative"
       [
         "Thank you for your feedback, #{customer_name}. We sincerely apologize for not meeting your expectations. Please contact us directly so we can make this right.",
-        "Hi #{customer_name}, we're sorry to hear about your experience. Your feedback is important to us and we'd love to discuss this further to improve our service.",
-        "Thank you for bringing this to our attention. We take all feedback seriously and would appreciate the opportunity to resolve this matter with you directly."
+        "Hi #{customer_name}, we're sorry to hear about your experience. Your feedback is important to us and we'd love to discuss this further.",
+        "Thank you for bringing this to our attention. We take all feedback seriously and would appreciate the opportunity to resolve this with you directly."
       ]
     else
       [
-        "Thank you for your review, #{customer_name}! We appreciate you taking the time to share your experience at #{location_name}.",
-        "Hi #{customer_name}! Thanks for visiting #{location_name} and for sharing your feedback. We hope to see you again soon!",
-        "Thank you for your honest feedback about #{location_name}. We value all our customers' opinions and experiences."
+        "Thank you for your review, #{customer_name}! We appreciate you sharing your experience at #{location_name}.",
+        "Hi #{customer_name}! Thanks for visiting #{location_name} and sharing your feedback. We hope to see you again soon!",
+        "Thank you for your honest feedback about #{location_name}. We value all our customers' opinions."
       ]
     end
   end

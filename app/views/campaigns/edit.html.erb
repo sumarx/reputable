@@ -1,0 +1,10 @@
+<% content_for :page_title, "Edit #{@campaign.name}" %>
+
+<div class="max-w-2xl space-y-6">
+  <%= link_to "← Back to Campaign", campaign_path(@campaign), class: "text-sm text-indigo-600 hover:text-indigo-500" %>
+
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+    <h3 class="text-lg font-medium text-gray-900 mb-6">Edit Campaign</h3>
+    <%= render "form" %>
+  </div>
+</div>

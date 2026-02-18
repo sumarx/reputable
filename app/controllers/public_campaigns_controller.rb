@@ -1,9 +1,9 @@
 class PublicCampaignsController < ApplicationController
   allow_unauthenticated_access
+  layout false
   before_action :set_campaign
 
   def show
-    # Customer-facing feedback form
     @campaign_response = @campaign.campaign_responses.build
     @location = @campaign.location
   end
@@ -11,17 +11,26 @@ class PublicCampaignsController < ApplicationController
   def respond
     @campaign_response = @campaign.campaign_responses.build(campaign_response_params)
     @location = @campaign.location
-    
+
     if @campaign_response.save
       if @campaign_response.positive?
-        # Redirect to review platform for positive feedback
-        redirect_to review_platform_url, allow_other_host: true
+        @redirect_url = review_platform_url
+        render :redirect_to_review
       else
-        # Thank you page for negative feedback (kept private)
         render :thank_you
       end
     else
       render :show, status: :unprocessable_entity
+    end
+  end
+
+  def track_click
+    response = @campaign.campaign_responses.find_by(id: params[:response_id])
+    if response
+      response.update(clicked_external: true)
+      head :ok
+    else
+      head :not_found
     end
   end
 
@@ -30,7 +39,7 @@ class PublicCampaignsController < ApplicationController
   def set_campaign
     @campaign = Campaign.find_by!(slug: params[:slug])
   rescue ActiveRecord::RecordNotFound
-    render file: 'public/404.html', status: :not_found, layout: false
+    render file: "public/404.html", status: :not_found, layout: false
   end
 
   def campaign_response_params
@@ -39,15 +48,15 @@ class PublicCampaignsController < ApplicationController
 
   def review_platform_url
     location = @campaign.location
-    
+
     case @campaign.redirect_platform
-    when 'google'
+    when "google"
       google_review_url(location)
-    when 'facebook'
+    when "facebook"
       facebook_review_url(location)
-    when 'tripadvisor'
+    when "tripadvisor"
       tripadvisor_review_url(location)
-    when 'yelp'
+    when "yelp"
       yelp_review_url(location)
     else
       google_review_url(location)
@@ -58,7 +67,7 @@ class PublicCampaignsController < ApplicationController
     if location.google_place_id.present?
       "https://search.google.com/local/writereview?placeid=#{location.google_place_id}"
     else
-      "https://www.google.com/search?q=#{URI.encode_www_form_component(location.name + ' ' + location.full_address)}"
+      "https://www.google.com/search?q=#{URI.encode_www_form_component(location.name + ' ' + (location.full_address || ''))}"
     end
   end
 

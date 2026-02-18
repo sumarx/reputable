@@ -8,8 +8,8 @@ class CampaignResponse < ApplicationRecord
   scope :negative, -> { where(outcome: 'negative') }
   scope :redirected, -> { where(outcome: 'redirect') }
 
+  before_validation :determine_outcome, on: :create
   after_create :update_campaign_counters
-  after_create :determine_outcome
 
   def positive?
     rating >= campaign.positive_threshold
@@ -27,10 +27,6 @@ class CampaignResponse < ApplicationRecord
   end
 
   def determine_outcome
-    if positive?
-      update!(outcome: 'redirect')
-    else
-      update!(outcome: 'private')
-    end
+    self.outcome = positive? ? 'redirect' : 'private'
   end
 end

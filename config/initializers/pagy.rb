@@ -1,0 +1,1 @@
+# Pagy config

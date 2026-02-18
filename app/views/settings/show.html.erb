@@ -1,0 +1,81 @@
+<% content_for :page_title, "Settings" %>
+
+<div class="max-w-3xl space-y-6">
+  <!-- Account Settings -->
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+    <h3 class="text-lg font-medium text-gray-900 mb-6">Account Settings</h3>
+    <%= form_with url: settings_path, method: :patch, class: "space-y-4" do |f| %>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Business Name</label>
+        <input type="text" name="account[name]" value="<%= @account.name %>" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Plan</label>
+          <p class="text-sm font-medium text-gray-900 bg-gray-50 rounded-md px-3 py-2"><%= @account.plan.capitalize %></p>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+          <p class="text-sm font-medium text-gray-900 bg-gray-50 rounded-md px-3 py-2"><%= @account.subscription_status.capitalize %></p>
+        </div>
+      </div>
+      <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 cursor-pointer">Save Account</button>
+    <% end %>
+  </div>
+
+  <!-- Profile Settings -->
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+    <h3 class="text-lg font-medium text-gray-900 mb-6">Profile</h3>
+    <%= form_with url: settings_path, method: :patch, class: "space-y-4" do |f| %>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+          <input type="text" name="user[name]" value="<%= @user.name %>" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+          <input type="email" name="user[email_address]" value="<%= @user.email_address %>" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+        </div>
+      </div>
+      <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 cursor-pointer">Save Profile</button>
+    <% end %>
+  </div>
+
+  <!-- Notification Settings -->
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+    <h3 class="text-lg font-medium text-gray-900 mb-6">Notifications</h3>
+    <%= form_with url: settings_path, method: :patch, class: "space-y-4" do |f| %>
+      <div class="space-y-3">
+        <label class="flex items-center">
+          <input type="hidden" name="notification_settings[email_on_negative]" value="0">
+          <input type="checkbox" name="notification_settings[email_on_negative]" value="1" <%= "checked" if @notification_settings.email_on_negative %> class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+          <span class="ml-2 text-sm text-gray-700">Email me on negative reviews</span>
+        </label>
+        <label class="flex items-center">
+          <input type="hidden" name="notification_settings[email_daily_digest]" value="0">
+          <input type="checkbox" name="notification_settings[email_daily_digest]" value="1" <%= "checked" if @notification_settings.email_daily_digest %> class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+          <span class="ml-2 text-sm text-gray-700">Daily digest email</span>
+        </label>
+        <label class="flex items-center">
+          <input type="hidden" name="notification_settings[sms_on_negative]" value="0">
+          <input type="checkbox" name="notification_settings[sms_on_negative]" value="1" <%= "checked" if @notification_settings.sms_on_negative %> class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+          <span class="ml-2 text-sm text-gray-700">SMS on negative reviews</span>
+        </label>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+          <input type="text" name="notification_settings[phone_number]" value="<%= @notification_settings.phone_number %>" placeholder="+1234567890" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+        </div>
+        <label class="flex items-center">
+          <input type="hidden" name="notification_settings[slack_webhook_enabled]" value="0">
+          <input type="checkbox" name="notification_settings[slack_webhook_enabled]" value="1" <%= "checked" if @notification_settings.slack_webhook_enabled %> class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+          <span class="ml-2 text-sm text-gray-700">Enable Slack notifications</span>
+        </label>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Slack Webhook URL</label>
+          <input type="text" name="notification_settings[slack_webhook_url]" value="<%= @notification_settings.slack_webhook_url %>" placeholder="https://hooks.slack.com/..." class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+        </div>
+      </div>
+      <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 cursor-pointer">Save Notifications</button>
+    <% end %>
+  </div>
+</div>

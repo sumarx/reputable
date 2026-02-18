@@ -93,7 +93,7 @@
       <% if @recent_reviews.any? %>
         <div class="space-y-4">
           <% @recent_reviews.first(5).each do |review| %>
-            <div class="border-l-4 border-indigo-400 pl-4 py-2">
+            <%= link_to review_path(review), class: "block border-l-4 border-indigo-400 pl-4 py-2 hover:bg-gray-50 rounded-r-md transition-colors cursor-pointer" do %>
               <div class="flex items-center justify-between mb-1">
                 <div class="flex items-center">
                   <span class="text-sm font-medium text-gray-900"><%= review.reviewer_name || "Anonymous" %></span>
@@ -101,21 +101,76 @@
                     <%= review.platform.capitalize %>
                   </span>
                 </div>
-                <div class="text-sm text-yellow-500">
-                  <%= review.star_rating %>
-                </div>
+                <%= star_rating(review.rating) %>
               </div>
               <p class="text-sm text-gray-600 line-clamp-2"><%= truncate(review.body, length: 100) %></p>
               <p class="text-xs text-gray-400 mt-1">
                 <%= time_ago_in_words(review.published_at || review.created_at) %> ago
               </p>
-            </div>
+            <% end %>
           <% end %>
         </div>
       <% else %>
         <p class="text-gray-500 text-center py-8">No reviews yet. Start collecting reviews!</p>
       <% end %>
     </div>
+  </div>
+
+  <!-- Campaign Performance -->
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-lg font-medium text-gray-900">Campaign Performance</h3>
+      <%= link_to "View All Campaigns", campaigns_path, class: "text-sm text-indigo-600 hover:text-indigo-500" %>
+    </div>
+
+    <% if @campaign_stats[:total_responses] > 0 %>
+      <!-- Campaign Stats -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <div class="bg-gray-50 rounded-lg p-4 text-center">
+          <p class="text-xs text-gray-500">Active Campaigns</p>
+          <p class="text-2xl font-bold text-gray-900"><%= @campaign_stats[:active_campaigns] %></p>
+        </div>
+        <div class="bg-gray-50 rounded-lg p-4 text-center">
+          <p class="text-xs text-gray-500">Feedback Collected</p>
+          <p class="text-2xl font-bold text-gray-900"><%= @campaign_stats[:total_responses] %></p>
+        </div>
+        <div class="bg-gray-50 rounded-lg p-4 text-center">
+          <p class="text-xs text-gray-500">Sent to Review</p>
+          <p class="text-2xl font-bold text-green-600"><%= @campaign_stats[:total_redirects] %></p>
+        </div>
+        <div class="bg-gray-50 rounded-lg p-4 text-center">
+          <p class="text-xs text-gray-500">Clicked to Post</p>
+          <p class="text-2xl font-bold text-indigo-600"><%= @campaign_stats[:total_clicked] %></p>
+        </div>
+      </div>
+
+      <!-- Recent Campaign Responses -->
+      <% if @campaign_stats[:recent_responses].any? %>
+        <h4 class="text-sm font-medium text-gray-700 mb-3">Recent Campaign Feedback</h4>
+        <div class="space-y-3">
+          <% @campaign_stats[:recent_responses].each do |response| %>
+            <%= link_to campaign_campaign_response_path(response.campaign, response), class: "block border-l-4 border-indigo-400 pl-4 py-2 hover:bg-gray-50 rounded-r-md transition-colors cursor-pointer" do %>
+              <div class="flex items-center justify-between mb-1">
+                <div class="flex items-center gap-2">
+                  <span class="text-sm font-medium text-gray-900"><%= response.customer_name || "Anonymous" %></span>
+                  <span class="text-sm text-yellow-500"><%= '★' * (response.rating || 0) %></span>
+                  <% if response.clicked_external? %>
+                    <span class="text-xs text-indigo-600">🚀 Posted</span>
+                  <% end %>
+                </div>
+                <span class="text-xs text-gray-400"><%= time_ago_in_words(response.created_at) %> ago</span>
+              </div>
+              <% if response.feedback.present? %>
+                <p class="text-sm text-gray-600 line-clamp-1"><%= truncate(response.feedback, length: 100) %></p>
+              <% end %>
+              <p class="text-xs text-gray-400 mt-1"><%= response.campaign.name %> · <%= response.campaign.location.name %></p>
+            <% end %>
+          <% end %>
+        </div>
+      <% end %>
+    <% else %>
+      <p class="text-gray-500 text-center py-4">No campaign responses yet. Create a campaign and share the QR code!</p>
+    <% end %>
   </div>
 
   <!-- Quick Actions -->

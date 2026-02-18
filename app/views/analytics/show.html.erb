@@ -1,0 +1,72 @@
+<% content_for :page_title, "Analytics" %>
+
+<div class="space-y-6">
+  <!-- Stats -->
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 text-center">
+      <p class="text-sm text-gray-500">Total Reviews</p>
+      <p class="text-3xl font-bold text-gray-900"><%= @total_reviews %></p>
+    </div>
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 text-center">
+      <p class="text-sm text-gray-500">Average Rating</p>
+      <p class="text-3xl font-bold text-gray-900"><%= @average_rating %></p>
+    </div>
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 text-center">
+      <p class="text-sm text-gray-500">Positive</p>
+      <p class="text-3xl font-bold text-green-600"><%= @positive_count %></p>
+    </div>
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 text-center">
+      <p class="text-sm text-gray-500">Negative</p>
+      <p class="text-3xl font-bold text-red-600"><%= @negative_count %></p>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- Rating Trend -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+      <h3 class="text-lg font-medium text-gray-900 mb-4">Rating Trend (90 Days)</h3>
+      <%= line_chart @rating_trend, height: "300px", colors: ["#4F46E5"] %>
+    </div>
+
+    <!-- Reviews Over Time -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+      <h3 class="text-lg font-medium text-gray-900 mb-4">Reviews Over Time</h3>
+      <%= column_chart @reviews_over_time, height: "300px", colors: ["#4F46E5"] %>
+    </div>
+
+    <!-- By Platform -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+      <h3 class="text-lg font-medium text-gray-900 mb-4">Reviews by Platform</h3>
+      <%= pie_chart @reviews_by_platform, height: "300px", donut: true %>
+    </div>
+
+    <!-- Rating Distribution -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+      <h3 class="text-lg font-medium text-gray-900 mb-4">Rating Distribution</h3>
+      <%= column_chart @rating_distribution.sort.map { |k, v| ["#{k} Stars", v] }, height: "300px", colors: ["#4F46E5"] %>
+    </div>
+  </div>
+
+  <!-- Location Breakdown -->
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+    <h3 class="text-lg font-medium text-gray-900 mb-4">Location Performance</h3>
+    <table class="min-w-full divide-y divide-gray-200">
+      <thead class="bg-gray-50">
+        <tr>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Location</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Reviews</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Avg Rating</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-200">
+        <% @locations.each do |location| %>
+          <tr>
+            <td class="px-6 py-4 text-sm font-medium text-gray-900"><%= link_to location.name, location_path(location), class: "text-indigo-600 hover:text-indigo-500" %></td>
+            <td class="px-6 py-4 text-sm text-gray-500"><%= location.total_reviews %></td>
+            <td class="px-6 py-4 text-sm text-gray-500"><%= location.average_rating&.round(1) || "—" %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>

@@ -18,17 +18,30 @@ Rails.application.routes.draw do
     end
   end
   
-  resources :locations
+  resources :locations do
+    member do
+      post :sync_reviews
+    end
+  end
+
+  # Google OAuth
+  get "auth/google", to: "google_oauth#connect", as: :google_oauth_connect
+  get "auth/google/callback", to: "google_oauth#callback", as: :google_oauth_callback
+  delete "auth/google/:location_id", to: "google_oauth#disconnect", as: :google_oauth_disconnect
+
+  resources :review_imports, only: [:new, :create]
   
   resources :campaigns do
     member do
       get :qr_code
     end
+    resources :campaign_responses, only: [:show], path: "responses"
   end
   
   # Public campaign feedback page
   get "c/:slug", to: "public_campaigns#show", as: :public_campaign
   post "c/:slug/respond", to: "public_campaigns#respond", as: :public_campaign_respond
+  post "c/:slug/track_click", to: "public_campaigns#track_click", as: :public_campaign_track_click
   
   get "analytics", to: "analytics#show"
   resource :settings, only: [:show, :update]
@@ -44,5 +57,10 @@ Rails.application.routes.draw do
   # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
 
   # Defines the root path route ("/")
-  root "dashboard#show"
+  get "privacy", to: "pages#privacy"
+  get "terms", to: "pages#terms"
+  get "about", to: "pages#about"
+  get "contact", to: "pages#contact"
+
+  root "pages#home"
 end

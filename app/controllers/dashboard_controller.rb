@@ -6,6 +6,8 @@ class DashboardController < ApplicationController
     @stats = calculate_stats
     @recent_reviews = Current.account.reviews.recent.includes(:location).limit(10)
     @rating_trend_data = rating_trend_data
+    @campaigns = Current.account.campaigns.active.includes(:location)
+    @campaign_stats = calculate_campaign_stats
   end
 
   private
@@ -34,6 +36,18 @@ class DashboardController < ApplicationController
     return 0 if reviews_with_sentiment.empty?
     
     (reviews_with_sentiment.average(:sentiment_score) * 100).round(1)
+  end
+
+  def calculate_campaign_stats
+    campaigns = Current.account.campaigns
+    responses = CampaignResponse.joins(:campaign).where(campaigns: { account_id: Current.account.id })
+    {
+      active_campaigns: campaigns.active.count,
+      total_responses: responses.count,
+      total_redirects: responses.where(outcome: 'redirect').count,
+      total_clicked: responses.where(clicked_external: true).count,
+      recent_responses: responses.order(created_at: :desc).limit(5).includes(campaign: :location)
+    }
   end
 
   def rating_trend_data

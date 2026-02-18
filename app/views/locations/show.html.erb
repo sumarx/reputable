@@ -1,0 +1,118 @@
+<% content_for :page_title, @location.name %>
+
+<div class="space-y-6">
+  <div class="flex items-center justify-between">
+    <%= link_to "← Back to Locations", locations_path, class: "text-sm text-indigo-600 hover:text-indigo-500" %>
+    <div class="flex gap-3">
+      <% if @location.google_place_id.present? %>
+        <%= button_to "Sync Google Reviews", sync_reviews_location_path(@location), method: :post, class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700" %>
+      <% end %>
+      <%= link_to "Edit", edit_location_path(@location), class: "inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50" %>
+      <%= button_to "Delete", location_path(@location), method: :delete, data: { turbo_confirm: "Are you sure?" }, class: "inline-flex items-center px-4 py-2 border border-red-300 text-sm font-medium rounded-md text-red-700 bg-white hover:bg-red-50" %>
+    </div>
+  </div>
+
+  <!-- Location Details -->
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div>
+        <p class="text-sm text-gray-500">Address</p>
+        <p class="text-sm font-medium text-gray-900"><%= @location.full_address.presence || "—" %></p>
+      </div>
+      <div>
+        <p class="text-sm text-gray-500">Phone</p>
+        <p class="text-sm font-medium text-gray-900"><%= @location.phone.presence || "—" %></p>
+      </div>
+      <div>
+        <p class="text-sm text-gray-500">Google Place ID</p>
+        <p class="text-sm font-medium text-gray-900"><%= @location.google_place_id.presence || "—" %></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 text-center">
+      <p class="text-sm text-gray-500">Total Reviews</p>
+      <p class="text-3xl font-bold text-gray-900"><%= @location.total_reviews %></p>
+    </div>
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 text-center">
+      <p class="text-sm text-gray-500">Average Rating</p>
+      <p class="text-3xl font-bold text-gray-900"><%= @location.average_rating&.round(1) || "—" %></p>
+    </div>
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 text-center">
+      <p class="text-sm text-gray-500">Campaigns</p>
+      <p class="text-3xl font-bold text-gray-900"><%= @location.campaigns.count %></p>
+    </div>
+  </div>
+
+  <!-- Google Business Profile Connection -->
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+    <h3 class="text-lg font-medium text-gray-900 mb-4">Google Business Profile</h3>
+    <% if @location.google_connected? %>
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+            ✓ Connected
+          </span>
+          <% if @location.google_account_id.present? && @location.google_location_id.present? %>
+            <span class="text-xs text-gray-500">Account: <%= @location.google_account_id %> / Location: <%= @location.google_location_id %></span>
+          <% end %>
+        </div>
+        <div class="flex gap-3">
+          <%= button_to "Sync All Reviews", sync_reviews_location_path(@location), method: :post, class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700" %>
+          <%= button_to "Disconnect", google_oauth_disconnect_path(location_id: @location.id), method: :delete, data: { turbo_confirm: "Are you sure you want to disconnect Google Business Profile?" }, class: "inline-flex items-center px-4 py-2 border border-red-300 text-sm font-medium rounded-md text-red-700 bg-white hover:bg-red-50" %>
+        </div>
+      </div>
+    <% else %>
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm text-gray-600">Connect your Google Business Profile to access <strong>all</strong> your reviews, not just the 5 most recent.</p>
+        </div>
+        <div>
+          <%= link_to "Connect Google Business Profile", google_oauth_connect_path(location_id: @location.id), class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700" %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <!-- Platform Connections -->
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+    <h3 class="text-lg font-medium text-gray-900 mb-4">Platform Connections</h3>
+    <% if @platform_connections.any? %>
+      <div class="space-y-3">
+        <% @platform_connections.each do |conn| %>
+          <div class="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
+            <span class="text-sm font-medium text-gray-900"><%= conn.platform.capitalize %></span>
+            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium <%= conn.status == 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' %>">
+              <%= conn.status.capitalize %>
+            </span>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <p class="text-sm text-gray-500">No platform connections yet.</p>
+    <% end %>
+  </div>
+
+  <!-- Recent Reviews -->
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+    <h3 class="text-lg font-medium text-gray-900 mb-4">Recent Reviews</h3>
+    <% if @reviews.any? %>
+      <div class="space-y-4">
+        <% @reviews.each do |review| %>
+          <%= link_to review_path(review), class: "block border-l-4 border-indigo-400 pl-4 py-2 hover:bg-gray-50" do %>
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-sm font-medium text-gray-900"><%= review.reviewer_name || "Anonymous" %></span>
+              <%= star_rating(review.rating) %>
+            </div>
+            <p class="text-sm text-gray-600 line-clamp-2"><%= truncate(review.body, length: 120) %></p>
+            <p class="text-xs text-gray-400 mt-1"><%= time_ago_in_words(review.published_at || review.created_at) %> ago</p>
+          <% end %>
+        <% end %>
+      </div>
+    <% else %>
+      <p class="text-sm text-gray-500">No reviews yet for this location.</p>
+    <% end %>
+  </div>
+</div>

@@ -1,0 +1,109 @@
+<% content_for :page_title, "Reviews" %>
+
+<div class="space-y-6">
+  <div class="flex justify-end">
+    <%= link_to "Import Reviews", new_review_import_path, class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700" %>
+  </div>
+
+  <!-- Filters -->
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+    <%= form_with url: reviews_path, method: :get, class: "grid grid-cols-1 md:grid-cols-5 gap-4" do |f| %>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Platform</label>
+        <%= select_tag :platform, options_for_select([["All Platforms", ""], "google", "facebook", "tripadvisor", "yelp"], @filter_params[:platform]), class: "w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" %>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Sentiment</label>
+        <%= select_tag :sentiment, options_for_select([["All Sentiments", ""], "positive", "neutral", "negative"], @filter_params[:sentiment]), class: "w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" %>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Rating</label>
+        <%= select_tag :rating, options_for_select([["All Ratings", ""], ["5 Stars", 5], ["4 Stars", 4], ["3 Stars", 3], ["2 Stars", 2], ["1 Star", 1]], @filter_params[:rating]), class: "w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" %>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Location</label>
+        <%= select_tag :location_id, options_for_select([["All Locations", ""]] + Current.account.locations.pluck(:name, :id), @filter_params[:location_id]), class: "w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" %>
+      </div>
+      <div class="flex items-end">
+        <%= f.submit "Filter", class: "w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 cursor-pointer" %>
+      </div>
+    <% end %>
+  </div>
+
+  <!-- Reviews List -->
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+    <div class="px-6 py-4 border-b border-gray-200">
+      <h3 class="text-lg font-medium text-gray-900"><%= @pagy.count %> Reviews</h3>
+    </div>
+    <% if @reviews.any? %>
+      <div class="divide-y divide-gray-200">
+        <% @reviews.each do |review| %>
+        <%= link_to review_path(review), class: "block px-6 py-4 hover:bg-gray-50 transition-colors" do %>
+          <div class="flex items-start justify-between">
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-3 mb-1">
+                <span class="text-sm font-semibold text-gray-900"><%= review.reviewer_name || "Anonymous" %></span>
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800"><%= review.platform.capitalize %></span>
+                <% if review.sentiment.present? %>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium
+                    <%= case review.sentiment
+                        when 'positive' then 'bg-green-100 text-green-800'
+                        when 'negative' then 'bg-red-100 text-red-800'
+                        else 'bg-yellow-100 text-yellow-800'
+                        end %>">
+                    <%= review.sentiment.capitalize %>
+                  </span>
+                <% end %>
+                <% if review.replied? %>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">✓ Replied</span>
+                <% elsif review.negative? %>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">⚠ Needs Reply</span>
+                <% end %>
+              </div>
+              <div class="mb-1"><%= star_rating(review.rating) %></div>
+              <p class="text-sm text-gray-600 line-clamp-2"><%= truncate(review.body, length: 200) %></p>
+              <div class="mt-1 flex items-center gap-3 text-xs text-gray-400">
+                <span><%= review.location.name %></span>
+                <span><%= time_ago_in_words(review.published_at || review.created_at) %> ago</span>
+              </div>
+            </div>
+          </div>
+        <% end %>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="p-12 text-center">
+        <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path>
+        </svg>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">No reviews found</h3>
+        <p class="text-gray-500 mb-4">Try adjusting your filters or import reviews to get started.</p>
+        <%= link_to "Import Reviews", new_review_import_path, class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700" %>
+      </div>
+    <% end %>
+
+    <!-- Pagination -->
+    <% if @pagy.last > 1 %>
+      <div class="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+        <p class="text-sm text-gray-500">
+          Showing <%= @pagy.from %>–<%= @pagy.to %> of <%= @pagy.count %> reviews
+        </p>
+        <nav class="flex items-center gap-1">
+          <% if @pagy.page > 1 %>
+            <%= link_to "← Previous", url_for(page: @pagy.page - 1, **@filter_params), class: "px-3 py-1.5 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-md hover:bg-gray-50" %>
+          <% end %>
+          <% (1..@pagy.last).each do |page_number| %>
+            <% if page_number == @pagy.page %>
+              <span class="px-3 py-1.5 text-sm font-medium text-white bg-indigo-600 border border-indigo-600 rounded-md"><%= page_number %></span>
+            <% else %>
+              <%= link_to page_number, url_for(page: page_number, **@filter_params), class: "px-3 py-1.5 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-md hover:bg-gray-50" %>
+            <% end %>
+          <% end %>
+          <% if @pagy.page < @pagy.last %>
+            <%= link_to "Next →", url_for(page: @pagy.page + 1, **@filter_params), class: "px-3 py-1.5 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-md hover:bg-gray-50" %>
+          <% end %>
+        </nav>
+      </div>
+    <% end %>
+  </div>
+</div>

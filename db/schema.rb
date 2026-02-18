@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_17_110500) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_18_071111) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -27,6 +27,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_17_110500) do
 
   create_table "campaign_responses", force: :cascade do |t|
     t.bigint "campaign_id", null: false
+    t.boolean "clicked_external", default: false, null: false
     t.datetime "created_at", null: false
     t.string "customer_name"
     t.string "customer_phone"
@@ -63,6 +64,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_17_110500) do
     t.string "country"
     t.datetime "created_at", null: false
     t.string "facebook_page_id"
+    t.string "google_account_id"
+    t.boolean "google_connected", default: false
+    t.string "google_location_id"
+    t.datetime "google_oauth_expires_at"
+    t.text "google_oauth_refresh_token_ciphertext"
+    t.text "google_oauth_token_ciphertext"
     t.string "google_place_id"
     t.float "latitude"
     t.float "longitude"

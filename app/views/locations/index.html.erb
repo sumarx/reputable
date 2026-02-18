@@ -1,0 +1,41 @@
+<% content_for :page_title, "Locations" %>
+
+<div class="space-y-6">
+  <div class="flex justify-end">
+    <%= link_to new_location_path, class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700" do %>
+      <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+      Add Location
+    <% end %>
+  </div>
+
+  <% if @locations.any? %>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <% @locations.each do |location| %>
+        <%= link_to location_path(location), class: "block bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow" do %>
+          <h3 class="text-lg font-semibold text-gray-900 mb-1"><%= location.name %></h3>
+          <p class="text-sm text-gray-500 mb-4"><%= location.full_address %></p>
+
+          <div class="grid grid-cols-2 gap-4 mb-4">
+            <div>
+              <p class="text-xs text-gray-500">Reviews</p>
+              <p class="text-xl font-semibold text-gray-900"><%= location.total_reviews %></p>
+            </div>
+            <div>
+              <p class="text-xs text-gray-500">Avg Rating</p>
+              <p class="text-xl font-semibold text-gray-900"><%= location.average_rating&.round(1) || "—" %></p>
+            </div>
+          </div>
+
+          <% if location.phone.present? %>
+            <p class="text-xs text-gray-400"><%= location.phone %></p>
+          <% end %>
+        <% end %>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
+      <p class="text-gray-500 mb-4">No locations yet.</p>
+      <%= link_to "Add your first location", new_location_path, class: "text-indigo-600 hover:text-indigo-500 font-medium" %>
+    </div>
+  <% end %>
+</div>

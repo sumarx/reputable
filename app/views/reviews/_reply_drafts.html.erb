@@ -1,0 +1,23 @@
+<% if reply_drafts.any? %>
+  <h3 class="text-lg font-medium text-gray-900 mb-4">Reply Drafts</h3>
+  <div class="space-y-4">
+    <% reply_drafts.each do |draft| %>
+      <div class="border border-gray-200 rounded-lg p-4">
+        <div class="flex items-center justify-between mb-2">
+          <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-800"><%= draft.tone.capitalize %></span>
+          <span class="text-xs text-gray-400"><%= draft.status.capitalize %></span>
+        </div>
+        <%= form_with model: draft, url: reply_draft_path(draft), method: :patch, class: "space-y-3" do |f| %>
+          <%= f.text_area :body, rows: 3, class: "w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" %>
+          <div class="flex gap-2">
+            <%= f.submit "Save", class: "inline-flex items-center px-3 py-1.5 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 cursor-pointer" %>
+            <% unless draft.approved? %>
+              <%= button_to "Approve", approve_reply_draft_path(draft), method: :post, class: "inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 cursor-pointer" %>
+            <% end %>
+            <%= button_to "Send Reply", send_reply_reply_draft_path(draft), method: :post, class: "inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 cursor-pointer", data: { turbo_confirm: "Send this reply?" } %>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+<% end %>

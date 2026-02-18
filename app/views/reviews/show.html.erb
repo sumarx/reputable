@@ -1,0 +1,85 @@
+<% content_for :page_title, "Review from #{@review.reviewer_name || 'Anonymous'}" %>
+
+<div class="space-y-6">
+  <%= link_to "← Back to Reviews", reviews_path, class: "text-sm text-indigo-600 hover:text-indigo-500" %>
+
+  <!-- Review Detail -->
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+    <div class="flex items-start justify-between mb-4">
+      <div>
+        <div class="flex items-center gap-3">
+          <% if @review.reviewer_avatar_url.present? %>
+            <img src="<%= @review.reviewer_avatar_url %>" class="w-10 h-10 rounded-full" alt="">
+          <% else %>
+            <div class="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center">
+              <span class="text-sm font-medium text-indigo-600"><%= (@review.reviewer_name || "A").first.upcase %></span>
+            </div>
+          <% end %>
+          <div>
+            <h2 class="text-lg font-semibold text-gray-900"><%= @review.reviewer_name || "Anonymous" %></h2>
+            <p class="text-sm text-gray-500"><%= @review.location.name %> · <%= @review.platform.capitalize %></p>
+          </div>
+        </div>
+      </div>
+      <div class="text-right">
+        <div class="text-lg text-yellow-500"><%= @review.star_rating %></div>
+        <p class="text-xs text-gray-400"><%= @review.published_at&.strftime("%B %d, %Y") %></p>
+      </div>
+    </div>
+
+    <div class="flex gap-2 mb-4">
+      <% if @review.sentiment.present? %>
+        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+          <%= case @review.sentiment
+              when 'positive' then 'bg-green-100 text-green-800'
+              when 'negative' then 'bg-red-100 text-red-800'
+              else 'bg-yellow-100 text-yellow-800'
+              end %>">
+          <%= @review.sentiment.capitalize %>
+          <% if @review.sentiment_score %> (<%= (@review.sentiment_score * 100).round %>%)<% end %>
+        </span>
+      <% end %>
+      <% if @review.replied? %>
+        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">✓ Replied</span>
+      <% elsif @review.negative? %>
+        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">⚠ Needs Reply</span>
+      <% end %>
+    </div>
+
+    <div class="prose prose-sm max-w-none text-gray-700">
+      <p><%= @review.body %></p>
+    </div>
+
+    <% if @review.reply.present? %>
+      <div class="mt-4 bg-gray-50 rounded-lg p-4 border-l-4 border-indigo-400">
+        <p class="text-sm font-medium text-gray-900 mb-1">Your Reply</p>
+        <p class="text-sm text-gray-600"><%= @review.reply %></p>
+        <p class="text-xs text-gray-400 mt-1">Replied <%= time_ago_in_words(@review.replied_at) %> ago</p>
+      </div>
+    <% end %>
+  </div>
+
+  <!-- Generate AI Reply -->
+  <% unless @review.replied? %>
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+      <h3 class="text-lg font-medium text-gray-900 mb-4">Generate AI Reply</h3>
+      <div class="flex gap-3">
+        <% %w[professional friendly apologetic].each do |tone| %>
+          <%= button_to generate_reply_review_path(@review, tone: tone), method: :post, class: "inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 cursor-pointer transition-colors" do %>
+            <%= tone.capitalize %> Tone
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- Reply Drafts -->
+  <%= turbo_stream_from @review, "reply_drafts" %>
+  <div id="reply_drafts">
+    <% if @reply_drafts.any? %>
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <%= render partial: "reviews/reply_drafts", locals: { reply_drafts: @reply_drafts } %>
+      </div>
+    <% end %>
+  </div>
+</div>

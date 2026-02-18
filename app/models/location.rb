@@ -1,5 +1,8 @@
 class Location < ApplicationRecord
   acts_as_tenant(:account)
+
+  has_encrypted :google_oauth_token
+  has_encrypted :google_oauth_refresh_token
   
   belongs_to :account
   has_many :platform_connections, dependent: :destroy

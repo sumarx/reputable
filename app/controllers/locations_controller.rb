@@ -1,6 +1,6 @@
 class LocationsController < ApplicationController
   before_action :resume_session
-  before_action :set_location, only: [:show, :edit, :update, :destroy]
+  before_action :set_location, only: [:show, :edit, :update, :destroy, :sync_reviews]
 
   def index
     @locations = Current.account.locations.includes(:reviews, :platform_connections)
@@ -34,6 +34,11 @@ class LocationsController < ApplicationController
     else
       render :edit, status: :unprocessable_entity
     end
+  end
+
+  def sync_reviews
+    SyncReviewsJob.perform_later(@location)
+    redirect_to @location, notice: "Review sync has been queued. New reviews will appear shortly."
   end
 
   def destroy

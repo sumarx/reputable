@@ -1,0 +1,112 @@
+<% content_for :page_title, @campaign.name %>
+
+<div class="space-y-6">
+  <div class="flex items-center justify-between">
+    <%= link_to "← Back to Campaigns", campaigns_path, class: "text-sm text-indigo-600 hover:text-indigo-500" %>
+    <div class="flex gap-3">
+      <%= link_to "QR Code", qr_code_campaign_path(@campaign, format: :svg), target: "_blank", class: "inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 cursor-pointer" %>
+      <%= link_to "Edit", edit_campaign_path(@campaign), class: "inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 cursor-pointer" %>
+      <%= button_to "Delete", campaign_path(@campaign), method: :delete, data: { turbo_confirm: "Are you sure?" }, class: "inline-flex items-center px-4 py-2 border border-red-300 text-sm font-medium rounded-md text-red-700 bg-white hover:bg-red-50 cursor-pointer" %>
+    </div>
+  </div>
+
+  <!-- Conversion Funnel Stats -->
+  <% clicked_count = @campaign.campaign_responses.where(clicked_external: true).count %>
+  <% click_rate = @campaign.redirects_count > 0 ? (clicked_count.to_f / @campaign.redirects_count * 100).round(1) : 0 %>
+  <div class="grid grid-cols-1 md:grid-cols-5 gap-6">
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 text-center">
+      <p class="text-sm text-gray-500">Total Responses</p>
+      <p class="text-3xl font-bold text-gray-900"><%= @campaign.responses_count %></p>
+    </div>
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 text-center">
+      <p class="text-sm text-gray-500">Positive Reviews</p>
+      <p class="text-3xl font-bold text-green-600"><%= @campaign.redirects_count %></p>
+      <p class="text-xs text-gray-400 mt-1"><%= @campaign.conversion_rate %>% of total</p>
+    </div>
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 text-center">
+      <p class="text-sm text-gray-500">Clicked to Post</p>
+      <p class="text-3xl font-bold text-indigo-600"><%= clicked_count %></p>
+      <p class="text-xs text-gray-400 mt-1"><%= click_rate %>% of positive</p>
+    </div>
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 text-center">
+      <p class="text-sm text-gray-500">Private Feedback</p>
+      <p class="text-3xl font-bold text-yellow-600"><%= @campaign.responses_count - @campaign.redirects_count %></p>
+    </div>
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 text-center">
+      <p class="text-sm text-gray-500">Conversion Rate</p>
+      <p class="text-3xl font-bold text-indigo-600"><%= @campaign.conversion_rate %>%</p>
+      <p class="text-xs text-gray-400 mt-1">Positive / Total</p>
+    </div>
+  </div>
+
+  <!-- Status Bar -->
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-4">
+        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium <%= @campaign.active? ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600' %>">
+          <%= @campaign.active? ? "● Active" : "○ Inactive" %>
+        </span>
+        <span class="text-sm text-gray-500"><%= @campaign.campaign_type.upcase %> · <%= @campaign.redirect_platform.capitalize %> · Threshold: <%= @campaign.positive_threshold %>+ stars</span>
+      </div>
+      <div class="text-sm">
+        <span class="text-gray-500">Public URL:</span>
+        <%= link_to @campaign.qr_code_url, public_campaign_path(@campaign.slug), target: "_blank", class: "text-indigo-600 hover:text-indigo-500 ml-1" %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Responses -->
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+    <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+      <h3 class="text-lg font-medium text-gray-900">Campaign Responses (<%= @campaign.responses_count %>)</h3>
+    </div>
+
+    <% if @responses.any? %>
+      <div class="divide-y divide-gray-200">
+        <% @responses.each do |response| %>
+          <%= link_to campaign_campaign_response_path(@campaign, response), class: "block px-6 py-4 hover:bg-gray-50 transition-colors cursor-pointer" do %>
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center gap-3">
+                <span class="text-sm font-medium text-gray-900"><%= response.customer_name || "Anonymous" %></span>
+                <span class="text-sm text-yellow-500"><%= '★' * (response.rating || 0) %><%= '☆' * (5 - (response.rating || 0)) %></span>
+              </div>
+              <div class="flex items-center gap-2">
+                <% case response.outcome %>
+                <% when 'redirect' %>
+                  <% if response.clicked_external? %>
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+                      🚀 Clicked to Post on <%= @campaign.redirect_platform.capitalize %>
+                    </span>
+                  <% else %>
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                      ✓ Sent to <%= @campaign.redirect_platform.capitalize %>
+                    </span>
+                  <% end %>
+                <% when 'private' %>
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                    Private Feedback
+                  </span>
+                <% else %>
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                    <%= response.outcome&.capitalize %>
+                  </span>
+                <% end %>
+                <span class="text-xs text-gray-400"><%= time_ago_in_words(response.created_at) %> ago</span>
+              </div>
+            </div>
+            <% if response.feedback.present? %>
+              <p class="text-sm text-gray-600"><%= response.feedback %></p>
+            <% end %>
+            <% if response.customer_phone.present? %>
+              <p class="text-xs text-gray-400 mt-1">📞 <%= response.customer_phone %></p>
+            <% end %>
+          <% end %>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="p-12 text-center">
+        <p class="text-gray-500">No responses yet. Share the QR code or public link to start collecting feedback!</p>
+      </div>
+    <% end %>
+  </div>
+</div>
