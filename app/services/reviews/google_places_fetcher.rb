@@ -66,11 +66,22 @@ module Reviews
       external_id = Digest::SHA256.hexdigest("#{author_name}:#{publish_time}")[0..63]
 
       existing = @location.reviews.find_by(platform: "google", external_review_id: external_id)
-      return :skipped if existing
+      if existing
+        # Update reply if Google has one and we don't
+        owner_reply = review_data.dig("ownerResponse", "text") || review_data.dig("reviewReply", "comment")
+        if owner_reply.present? && existing.reply.blank?
+          existing.update!(reply: owner_reply, reply_status: "sent", replied_at: existing.published_at)
+        end
+        return :skipped
+      end
 
       body = review_data.dig("originalText", "text") || review_data.dig("text", "text") || ""
       rating = review_data["rating"]
       published_at = publish_time.present? ? Time.parse(publish_time) : Time.current
+
+      # Check if owner already replied on Google
+      owner_reply = review_data.dig("ownerResponse", "text") || review_data.dig("reviewReply", "comment")
+      has_reply = owner_reply.present?
 
       @location.reviews.create!(
         account: @account,
@@ -80,7 +91,9 @@ module Reviews
         rating: rating,
         body: body,
         published_at: published_at,
-        reply_status: "pending"
+        reply_status: has_reply ? "sent" : "pending",
+        reply: has_reply ? owner_reply : nil,
+        replied_at: has_reply ? published_at : nil
       )
 
       :created

@@ -31,14 +31,28 @@ Rails.application.configure do
   # Store uploaded files on the local file system (see config/storage.yml for options).
   config.active_storage.service = :local
 
-  # Don't care if the mailer can't send.
-  config.action_mailer.raise_delivery_errors = false
+  # SMTP delivery via Gmail
+  config.action_mailer.delivery_method = :smtp
+  config.action_mailer.raise_delivery_errors = true
 
   # Make template changes take effect immediately.
   config.action_mailer.perform_caching = false
 
-  # Set localhost to be used by links generated in mailer templates.
-  config.action_mailer.default_url_options = { host: "localhost", port: 3000 }
+  # Set host for mailer links.
+  config.action_mailer.default_url_options = { host: "sumarx.sajjadumar.dev", protocol: "https" }
+  config.action_mailer.asset_host = "https://sumarx.sajjadumar.dev"
+
+  config.action_mailer.smtp_settings = {
+    address: ENV.fetch("SMTP_ADDRESS", "smtp.gmail.com"),
+    port: ENV.fetch("SMTP_PORT", 587).to_i,
+    domain: ENV.fetch("SMTP_DOMAIN", "sajjadumar.dev"),
+    user_name: ENV.fetch("SMTP_USERNAME") { ENV["SUMARX_GMAIL_USER"] },
+    password: ENV.fetch("SMTP_PASSWORD") { ENV["SUMARX_GMAIL_APP_PASSWORD"] },
+    authentication: :plain,
+    enable_starttls_auto: true,
+    open_timeout: 5,
+    read_timeout: 5
+  }
 
   # Print deprecation notices to the Rails logger.
   config.active_support.deprecation = :log
@@ -53,6 +67,7 @@ Rails.application.configure do
   config.active_record.query_log_tags_enabled = true
 
   # Highlight code that enqueued background job in logs.
+  config.active_job.queue_adapter = :async
   config.active_job.verbose_enqueue_logs = true
 
   # Highlight code that triggered redirect in logs.

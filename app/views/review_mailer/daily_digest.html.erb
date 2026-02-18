@@ -1,0 +1,40 @@
+<h2>Daily Review Digest — <%= @date.strftime('%B %d, %Y') %></h2>
+
+<p>Hi <%= @user.name %>,</p>
+
+<p>Here's your review summary for <strong><%= @account.name %></strong> today:</p>
+
+<table style="border-collapse: collapse; margin: 16px 0;">
+  <tr>
+    <td style="padding: 8px 16px 8px 0; font-weight: bold;">Total Responses</td>
+    <td style="padding: 8px 0;"><%= @total %></td>
+  </tr>
+  <tr>
+    <td style="padding: 8px 16px 8px 0; font-weight: bold; color: #16a34a;">Positive</td>
+    <td style="padding: 8px 0;"><%= @positive_count %></td>
+  </tr>
+  <tr>
+    <td style="padding: 8px 16px 8px 0; font-weight: bold; color: #dc2626;">Negative</td>
+    <td style="padding: 8px 0;"><%= @negative_count %></td>
+  </tr>
+</table>
+
+<% negative_responses = @responses.where(outcome: %w[private negative]).includes(campaign: :location).limit(10) %>
+<% if negative_responses.any? %>
+  <h3>Negative Feedback Details</h3>
+  <% negative_responses.each do |r| %>
+    <div style="border-left: 3px solid #dc2626; padding: 8px 12px; margin: 8px 0; background: #fef2f2;">
+      <strong><%= r.campaign.location.name %></strong> — Rating: <%= r.rating %>/5<br>
+      <% if r.feedback.present? %>
+        <em>"<%= r.feedback %>"</em><br>
+      <% end %>
+      <span style="color: #6b7280; font-size: 13px;"><%= r.created_at.strftime('%I:%M %p') %></span>
+    </div>
+  <% end %>
+<% end %>
+
+<p>
+  <a href="https://sumarx.sajjadumar.dev/reviews" style="background: #4f46e5; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px;">View All Reviews</a>
+</p>
+
+<p style="color: #6b7280; font-size: 14px;">— RepuTable</p>

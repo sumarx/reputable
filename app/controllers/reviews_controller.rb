@@ -1,7 +1,7 @@
 class ReviewsController < ApplicationController
   include Pagy::Method
   before_action :resume_session
-  before_action :set_review, only: [:show, :generate_reply]
+  before_action :set_review, only: [:show, :generate_reply, :manual_post]
 
   def index
     @reviews = filter_reviews
@@ -11,6 +11,13 @@ class ReviewsController < ApplicationController
 
   def show
     @reply_drafts = @review.reply_drafts.order(:created_at)
+  end
+
+  def manual_post
+    unless @review.reply.present?
+      redirect_to @review, alert: "No reply to post."
+      return
+    end
   end
 
   def generate_reply

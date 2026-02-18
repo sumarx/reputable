@@ -1,0 +1,114 @@
+<% content_for :page_title, "Post Reply" %>
+
+<div class="space-y-5">
+  <%= link_to "← Back to Review", review_path(@review), class: "text-sm text-indigo-600 hover:text-indigo-500" %>
+
+  <%# Success header %>
+  <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-green-500 to-emerald-600 p-6 text-white">
+    <div class="absolute -top-8 -right-8 w-32 h-32 bg-white/10 rounded-full"></div>
+    <div class="relative flex items-start gap-3">
+      <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+      </div>
+      <div>
+        <h2 class="text-lg font-bold mb-1">Reply Saved!</h2>
+        <p class="text-green-100 text-sm">Your reply has been saved. Now post it on Google to complete the loop.</p>
+      </div>
+    </div>
+  </div>
+
+  <%# The review context %>
+  <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
+    <div class="flex items-center gap-3 mb-3">
+      <div class="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center shrink-0">
+        <span class="text-xs font-medium text-indigo-600"><%= (@review.reviewer_name || "A").first.upcase %></span>
+      </div>
+      <div class="min-w-0">
+        <p class="text-sm font-medium text-gray-900"><%= @review.reviewer_name || "Anonymous" %></p>
+        <div class="flex items-center gap-2">
+          <span class="text-xs text-amber-500"><%= '★' * (@review.rating || 0) %><%= '☆' * (5 - (@review.rating || 0)) %></span>
+          <span class="text-xs text-gray-400"><%= @review.location.name %></span>
+        </div>
+      </div>
+    </div>
+    <% if @review.body.present? %>
+      <p class="text-sm text-gray-600 line-clamp-3"><%= @review.body %></p>
+    <% end %>
+  </div>
+
+  <%# Your reply — copy section %>
+  <div class="bg-white rounded-xl border border-gray-100 shadow-sm">
+    <div class="px-4 py-3 border-b border-gray-100">
+      <h3 class="text-sm font-semibold text-gray-900">Your Reply</h3>
+    </div>
+    <div class="p-4">
+      <div id="reply-text" class="bg-gray-50 rounded-lg p-4 text-sm text-gray-700 leading-relaxed mb-4"><%= @review.reply %></div>
+
+      <div class="flex flex-col sm:flex-row gap-2">
+        <button
+          onclick="copyReply(this)"
+          class="inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-xl text-white bg-indigo-600 hover:bg-indigo-700 shadow-sm shadow-indigo-200 transition-all cursor-pointer flex-1"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+          <span>Copy Reply</span>
+        </button>
+
+        <% google_maps_url = "https://www.google.com/maps/place/?q=place_id:#{@review.location.google_place_id}" if @review.location.google_place_id.present? %>
+        <% if google_maps_url %>
+          <a
+            href="<%= google_maps_url %>"
+            target="_blank"
+            rel="noopener"
+            class="inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-xl text-white bg-blue-600 hover:bg-blue-700 shadow-sm shadow-blue-200 transition-all cursor-pointer flex-1"
+          >
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"></path></svg>
+            <span>Open on Google Maps</span>
+          </a>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <%# Steps guide %>
+  <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
+    <h4 class="text-sm font-semibold text-gray-900 mb-3">How to post your reply:</h4>
+    <ol class="space-y-2 text-sm text-gray-600">
+      <li class="flex items-start gap-2">
+        <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-indigo-100 text-indigo-700 text-xs font-bold shrink-0 mt-0.5">1</span>
+        <span>Click <strong>"Copy Reply"</strong> above to copy the text</span>
+      </li>
+      <li class="flex items-start gap-2">
+        <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-indigo-100 text-indigo-700 text-xs font-bold shrink-0 mt-0.5">2</span>
+        <span>Click <strong>"Open on Google Maps"</strong> to go to your listing</span>
+      </li>
+      <li class="flex items-start gap-2">
+        <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-indigo-100 text-indigo-700 text-xs font-bold shrink-0 mt-0.5">3</span>
+        <span>Find the review and click <strong>"Reply"</strong></span>
+      </li>
+      <li class="flex items-start gap-2">
+        <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-indigo-100 text-indigo-700 text-xs font-bold shrink-0 mt-0.5">4</span>
+        <span><strong>Paste</strong> your reply and submit</span>
+      </li>
+    </ol>
+    <p class="text-xs text-gray-400 mt-3">💡 Once our Google API access is approved, replies will post automatically.</p>
+  </div>
+
+  <%= link_to "← Done, back to review", review_path(@review), class: "inline-flex items-center gap-1 text-sm text-indigo-600 hover:text-indigo-500" %>
+</div>
+
+<script>
+function copyReply(btn) {
+  const text = document.getElementById('reply-text').textContent.trim();
+  navigator.clipboard.writeText(text).then(() => {
+    const span = btn.querySelector('span');
+    span.textContent = 'Copied!';
+    btn.classList.remove('bg-indigo-600', 'hover:bg-indigo-700');
+    btn.classList.add('bg-green-600', 'hover:bg-green-700');
+    setTimeout(() => {
+      span.textContent = 'Copy Reply';
+      btn.classList.remove('bg-green-600', 'hover:bg-green-700');
+      btn.classList.add('bg-indigo-600', 'hover:bg-indigo-700');
+    }, 2000);
+  });
+}
+</script>

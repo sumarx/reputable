@@ -33,7 +33,7 @@
         </div>
 
         <div class="bg-white py-8 px-6 shadow rounded-lg sm:px-10">
-          <%= form_with model: [@campaign, @campaign_response], url: public_campaign_respond_path(@campaign.slug), local: true, class: "space-y-6" do |form| %>
+          <%= form_with model: [@campaign, @campaign_response], url: public_campaign_respond_path(@campaign.slug), data: { turbo: false }, class: "space-y-6" do |form| %>
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-4">Rate your experience</label>
               <div class="flex justify-center space-x-2">

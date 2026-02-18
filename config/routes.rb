@@ -8,6 +8,7 @@ Rails.application.routes.draw do
   resources :reviews, only: [:index, :show] do
     member do
       post :generate_reply
+      get :manual_post
     end
   end
   

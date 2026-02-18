@@ -41,9 +41,9 @@
     <% end %>
   </div>
 
-  <!-- Notification Settings -->
+  <!-- Email Notification Settings -->
   <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-    <h3 class="text-lg font-medium text-gray-900 mb-6">Notifications</h3>
+    <h3 class="text-lg font-medium text-gray-900 mb-6">Email Notifications</h3>
     <%= form_with url: settings_path, method: :patch, class: "space-y-4" do |f| %>
       <div class="space-y-3">
         <label class="flex items-center">
@@ -56,26 +56,30 @@
           <input type="checkbox" name="notification_settings[email_daily_digest]" value="1" <%= "checked" if @notification_settings.email_daily_digest %> class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
           <span class="ml-2 text-sm text-gray-700">Daily digest email</span>
         </label>
+      </div>
+      <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 cursor-pointer">Save Email Notifications</button>
+    <% end %>
+  </div>
+
+  <!-- Slack Notification Settings -->
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+    <h3 class="text-lg font-medium text-gray-900 mb-6">Slack Notifications</h3>
+    <%= form_with url: settings_path, method: :patch, class: "space-y-4" do |f| %>
+      <div class="space-y-3">
         <label class="flex items-center">
-          <input type="hidden" name="notification_settings[sms_on_negative]" value="0">
-          <input type="checkbox" name="notification_settings[sms_on_negative]" value="1" <%= "checked" if @notification_settings.sms_on_negative %> class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
-          <span class="ml-2 text-sm text-gray-700">SMS on negative reviews</span>
-        </label>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
-          <input type="text" name="notification_settings[phone_number]" value="<%= @notification_settings.phone_number %>" placeholder="+1234567890" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
-        </div>
-        <label class="flex items-center">
-          <input type="hidden" name="notification_settings[slack_webhook_enabled]" value="0">
-          <input type="checkbox" name="notification_settings[slack_webhook_enabled]" value="1" <%= "checked" if @notification_settings.slack_webhook_enabled %> class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+          <input type="hidden" name="account[notify_slack]" value="0">
+          <input type="checkbox" name="account[notify_slack]" value="1" <%= "checked" if @account.notify_slack %> class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
           <span class="ml-2 text-sm text-gray-700">Enable Slack notifications</span>
         </label>
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Slack Webhook URL</label>
-          <input type="text" name="notification_settings[slack_webhook_url]" value="<%= @notification_settings.slack_webhook_url %>" placeholder="https://hooks.slack.com/..." class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+          <input type="text" name="account[slack_webhook_url]" value="<%= @account.slack_webhook_url %>" placeholder="https://hooks.slack.com/services/..." class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+          <p class="mt-1 text-xs text-gray-500">Create an <a href="https://api.slack.com/messaging/webhooks" target="_blank" class="text-indigo-600 hover:text-indigo-500">Incoming Webhook</a> in your Slack workspace to get this URL.</p>
         </div>
       </div>
-      <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 cursor-pointer">Save Notifications</button>
+      <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 cursor-pointer">Save Slack Settings</button>
     <% end %>
   </div>
+
+  <p class="text-xs text-gray-500 text-center">More notification channels coming soon (SMS, WhatsApp)</p>
 </div>

@@ -1,4 +1,4 @@
 class ApplicationMailer < ActionMailer::Base
-  default from: "from@example.com"
+  default from: "RepuTable <#{ENV.fetch('SUMARX_GMAIL_USER', 'noreply@sajjadumar.dev')}>"
   layout "mailer"
 end

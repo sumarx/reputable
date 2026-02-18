@@ -1,0 +1,38 @@
+<h2>Negative Review Alert</h2>
+
+<p>Hi <%= @user.name %>,</p>
+
+<p>A customer left negative feedback at <strong><%= @location.name %></strong>.</p>
+
+<table style="border-collapse: collapse; margin: 16px 0;">
+  <tr>
+    <td style="padding: 8px 16px 8px 0; font-weight: bold; vertical-align: top;">Rating</td>
+    <td style="padding: 8px 0;"><%= @response.rating %> / 5</td>
+  </tr>
+  <% if @response.customer_name.present? %>
+  <tr>
+    <td style="padding: 8px 16px 8px 0; font-weight: bold; vertical-align: top;">Customer</td>
+    <td style="padding: 8px 0;"><%= @response.customer_name %></td>
+  </tr>
+  <% end %>
+  <% if @response.feedback.present? %>
+  <tr>
+    <td style="padding: 8px 16px 8px 0; font-weight: bold; vertical-align: top;">Feedback</td>
+    <td style="padding: 8px 0;"><%= @response.feedback %></td>
+  </tr>
+  <% end %>
+  <tr>
+    <td style="padding: 8px 16px 8px 0; font-weight: bold; vertical-align: top;">Campaign</td>
+    <td style="padding: 8px 0;"><%= @campaign.name %></td>
+  </tr>
+  <tr>
+    <td style="padding: 8px 16px 8px 0; font-weight: bold; vertical-align: top;">Time</td>
+    <td style="padding: 8px 0;"><%= @response.created_at.strftime('%b %d, %Y at %I:%M %p') %></td>
+  </tr>
+</table>
+
+<p>
+  <a href="https://sumarx.sajjadumar.dev/reviews" style="background: #4f46e5; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px;">View Reviews</a>
+</p>
+
+<p style="color: #6b7280; font-size: 14px;">— RepuTable</p>

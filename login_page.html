@@ -1,0 +1,87 @@
+<!-- BEGIN app/views/layouts/application.html.erb
+--><!DOCTYPE html>
+<html>
+  <head>
+    <title>RepuTable</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="RepuTable">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="csrf-param" content="authenticity_token" />
+<meta name="csrf-token" content="gn--pb4IU2dJqpTikOUqptGcsnBc5nV-Ah5737ByO63CG21sHLfF1HQycMr7NqHa0Ozjtd47dyZCFX3k5l3qwA" />
+    
+
+    
+
+    <link rel="icon" href="/icon.png" type="image/png">
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/icon.png">
+
+    <link rel="stylesheet" href="/assets/application-8b441ae0.css" data-turbo-track="reload" />
+<link rel="stylesheet" href="/assets/tailwind-38a82ea7.css" data-turbo-track="reload" />
+    <script type="importmap" data-turbo-track="reload">{
+  "imports": {
+    "application": "/assets/application-bfcdf840.js",
+    "@hotwired/turbo-rails": "/assets/turbo.min-9fd88cd5.js",
+    "@hotwired/stimulus": "/assets/stimulus.min-4b1e420e.js",
+    "@hotwired/stimulus-loading": "/assets/stimulus-loading-1fc53fe7.js",
+    "controllers/application": "/assets/controllers/application-3affb389.js",
+    "controllers/hello_controller": "/assets/controllers/hello_controller-708796bd.js",
+    "controllers": "/assets/controllers/index-ee64e1f1.js"
+  }
+}</script>
+<link rel="modulepreload" href="/assets/application-bfcdf840.js">
+<link rel="modulepreload" href="/assets/turbo.min-9fd88cd5.js">
+<link rel="modulepreload" href="/assets/stimulus.min-4b1e420e.js">
+<link rel="modulepreload" href="/assets/stimulus-loading-1fc53fe7.js">
+<link rel="modulepreload" href="/assets/controllers/application-3affb389.js">
+<link rel="modulepreload" href="/assets/controllers/hello_controller-708796bd.js">
+<link rel="modulepreload" href="/assets/controllers/index-ee64e1f1.js">
+<script type="module">import "application"</script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  </head>
+
+  <body class="bg-gray-50 font-sans antialiased">
+      <!-- Unauthenticated Layout -->
+      <div class="min-h-screen bg-gray-50 flex">
+        <div class="flex-1 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8">
+          <div class="sm:mx-auto sm:w-full sm:max-w-md">
+            <h2 class="text-3xl font-bold text-center text-gray-900 mb-8">RepuTable</h2>
+            
+            
+
+            <!-- BEGIN app/views/sessions/new.html.erb
+--><div class="mx-auto md:w-2/3 w-full">
+
+
+  <h1 class="font-bold text-4xl">Sign in</h1>
+
+  <form class="contents" action="http://localhost:3000/session" accept-charset="UTF-8" method="post"><input type="hidden" name="authenticity_token" value="-Jd_ZGSKx9m6X2b-Gdkgxbg-Vm0jWoSbqABh_cjqNJ2mtoIdn_kt9U9IqcEp9PiqzDbOXm7sF5ZIPkVyYRJcQQ" />
+    <div class="my-5">
+      <input required="required" autofocus="autofocus" autocomplete="username" placeholder="Enter your email address" class="block shadow-sm rounded-md border border-gray-400 focus:outline-blue-600 px-3 py-2 mt-2 w-full" type="email" name="email_address" id="email_address" />
+    </div>
+
+    <div class="my-5">
+      <input required="required" autocomplete="current-password" placeholder="Enter your password" maxlength="72" class="block shadow-sm rounded-md border border-gray-400 focus:outline-blue-600 px-3 py-2 mt-2 w-full" size="72" type="password" name="password" id="password" />
+    </div>
+
+    <div class="col-span-6 sm:flex sm:items-center sm:gap-4">
+      <div class="inline">
+        <input type="submit" name="commit" value="Sign in" class="w-full sm:w-auto text-center rounded-md px-3.5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white inline-block font-medium cursor-pointer" data-disable-with="Sign in" />
+      </div>
+
+      <div class="mt-4 text-sm text-gray-500 sm:mt-0">
+        <a class="text-gray-700 underline hover:no-underline" href="/passwords/new">Forgot password?</a>
+      </div>
+    </div>
+</form></div>
+<!-- END app/views/sessions/new.html.erb -->
+          </div>
+        </div>
+      </div>
+  </body>
+</html>
+<!-- END app/views/layouts/application.html.erb -->

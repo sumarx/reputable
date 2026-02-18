@@ -26,7 +26,7 @@ class SettingsController < ApplicationController
   private
 
   def account_params
-    params.require(:account).permit(:name)
+    params.require(:account).permit(:name, :notify_slack, :slack_webhook_url)
   end
 
   def user_params
@@ -34,6 +34,6 @@ class SettingsController < ApplicationController
   end
 
   def notification_params
-    params.require(:notification_settings).permit(:email_on_negative, :email_daily_digest, :sms_on_negative, :phone_number, :slack_webhook_enabled, :slack_webhook_url)
+    params.require(:notification_settings).permit(:email_on_negative, :email_daily_digest)
   end
 end

@@ -39,9 +39,11 @@
           <% if @review.sentiment_score %> (<%= (@review.sentiment_score * 100).round %>%)<% end %>
         </span>
       <% end %>
-      <% if @review.replied? %>
-        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">✓ Replied</span>
-      <% elsif @review.negative? %>
+      <% if @review.reply_status == 'sent' %>
+        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">✓ Posted to Google</span>
+      <% elsif @review.reply_status == 'manual' %>
+        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">📋 Reply saved (manual post)</span>
+      <% elsif @review.needs_reply? %>
         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">⚠ Needs Reply</span>
       <% end %>
     </div>
@@ -51,10 +53,24 @@
     </div>
 
     <% if @review.reply.present? %>
-      <div class="mt-4 bg-gray-50 rounded-lg p-4 border-l-4 border-indigo-400">
-        <p class="text-sm font-medium text-gray-900 mb-1">Your Reply</p>
+      <div class="mt-4 bg-gray-50 rounded-lg p-4 border-l-4 <%= @review.reply_status == 'sent' ? 'border-green-400' : 'border-indigo-400' %>">
+        <div class="flex items-center justify-between mb-1">
+          <p class="text-sm font-medium text-gray-900">Your Reply</p>
+          <% if @review.reply_status == 'sent' %>
+            <span class="text-xs text-green-600 font-medium">✓ Posted to Google</span>
+          <% elsif @review.reply_status == 'manual' %>
+            <span class="text-xs text-blue-600 font-medium">📋 Manual post</span>
+          <% end %>
+        </div>
         <p class="text-sm text-gray-600"><%= @review.reply %></p>
-        <p class="text-xs text-gray-400 mt-1">Replied <%= time_ago_in_words(@review.replied_at) %> ago</p>
+        <div class="flex items-center justify-between mt-2">
+          <p class="text-xs text-gray-400">Replied <%= time_ago_in_words(@review.replied_at) %> ago</p>
+          <% if @review.reply_status == 'manual' %>
+            <%= link_to manual_post_review_path(@review), class: "text-xs text-indigo-600 hover:text-indigo-500 font-medium" do %>
+              Copy & post on Google →
+            <% end %>
+          <% end %>
+        </div>
       </div>
     <% end %>
   </div>

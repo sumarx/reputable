@@ -1,41 +1,87 @@
 <% content_for :page_title, "Locations" %>
 
 <div class="space-y-6">
-  <div class="flex justify-end">
-    <%= link_to new_location_path, class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700" do %>
-      <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+  <!-- Header with count -->
+  <div class="flex items-center justify-between">
+    <div>
+      <p class="text-sm text-gray-500"><%= @locations.size %> <%= "location".pluralize(@locations.size) %> connected</p>
+    </div>
+    <%= link_to new_location_path, class: "inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-xl text-white bg-indigo-600 hover:bg-indigo-700 shadow-md shadow-indigo-200 transition-all hover:shadow-lg hover:shadow-indigo-200 cursor-pointer" do %>
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6"></path></svg>
       Add Location
     <% end %>
   </div>
 
   <% if @locations.any? %>
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
       <% @locations.each do |location| %>
-        <%= link_to location_path(location), class: "block bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow" do %>
-          <h3 class="text-lg font-semibold text-gray-900 mb-1"><%= location.name %></h3>
-          <p class="text-sm text-gray-500 mb-4"><%= location.full_address %></p>
+        <%= link_to location_path(location), class: "group block bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg hover:border-indigo-200 transition-all duration-200 overflow-hidden cursor-pointer" do %>
+          <!-- Colored top accent -->
+          <div class="h-1.5 bg-gradient-to-r from-indigo-500 to-purple-500"></div>
 
-          <div class="grid grid-cols-2 gap-4 mb-4">
-            <div>
-              <p class="text-xs text-gray-500">Reviews</p>
-              <p class="text-xl font-semibold text-gray-900"><%= location.total_reviews %></p>
+          <div class="p-5">
+            <!-- Name + address -->
+            <div class="mb-4">
+              <div class="flex items-start justify-between">
+                <h3 class="text-lg font-bold text-gray-900 group-hover:text-indigo-600 transition-colors"><%= location.name %></h3>
+                <svg class="w-5 h-5 text-gray-300 group-hover:text-indigo-400 transition-colors mt-0.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path></svg>
+              </div>
+              <div class="flex items-start gap-1.5 mt-1.5">
+                <svg class="w-3.5 h-3.5 text-gray-400 mt-0.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                <p class="text-xs text-gray-500 leading-relaxed"><%= location.full_address %></p>
+              </div>
             </div>
-            <div>
-              <p class="text-xs text-gray-500">Avg Rating</p>
-              <p class="text-xl font-semibold text-gray-900"><%= location.average_rating&.round(1) || "—" %></p>
+
+            <!-- Stats row -->
+            <div class="flex items-center gap-5 pt-4 border-t border-gray-100">
+              <!-- Rating with stars -->
+              <div class="flex items-center gap-2">
+                <div class="flex items-center gap-0.5">
+                  <% rating = location.average_rating&.round(1) || 0 %>
+                  <% 5.times do |i| %>
+                    <% if rating >= i + 1 %>
+                      <svg class="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                    <% elsif rating >= i + 0.5 %>
+                      <svg class="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" opacity="0.3"></path><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" clip-path="inset(0 50% 0 0)"></path></svg>
+                    <% else %>
+                      <svg class="w-4 h-4 text-gray-200" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                    <% end %>
+                  <% end %>
+                </div>
+                <span class="text-sm font-bold text-gray-900"><%= rating > 0 ? rating : "—" %></span>
+              </div>
+
+              <div class="w-px h-5 bg-gray-200"></div>
+
+              <!-- Review count -->
+              <div class="flex items-center gap-1.5">
+                <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+                <span class="text-sm font-semibold text-gray-700"><%= location.total_reviews %></span>
+                <span class="text-xs text-gray-400">reviews</span>
+              </div>
             </div>
+
+            <% if location.phone.present? %>
+              <div class="flex items-center gap-1.5 mt-3 pt-3 border-t border-gray-100">
+                <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
+                <p class="text-xs text-gray-400"><%= location.phone %></p>
+              </div>
+            <% end %>
           </div>
-
-          <% if location.phone.present? %>
-            <p class="text-xs text-gray-400"><%= location.phone %></p>
-          <% end %>
         <% end %>
       <% end %>
     </div>
   <% else %>
-    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
-      <p class="text-gray-500 mb-4">No locations yet.</p>
-      <%= link_to "Add your first location", new_location_path, class: "text-indigo-600 hover:text-indigo-500 font-medium" %>
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-12 text-center">
+      <div class="w-16 h-16 bg-indigo-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
+        <svg class="w-8 h-8 text-indigo-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+      </div>
+      <p class="text-gray-500 mb-1">No locations yet</p>
+      <p class="text-sm text-gray-400 mb-5">Connect your first business location to start tracking reviews.</p>
+      <%= link_to new_location_path, class: "inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-xl text-white bg-indigo-600 hover:bg-indigo-700 shadow-md shadow-indigo-200 transition-all cursor-pointer" do %>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6"></path></svg>
+        Add Location
+      <% end %>
     </div>
   <% end %>
 </div>

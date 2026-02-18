@@ -17,19 +17,25 @@ class ReplyDraftsController < ApplicationController
 
   def send_reply
     review = @reply_draft.review
-    poster = Replies::GoogleBusinessPoster.new(review, @reply_draft.body)
-    google_success = poster.call
+    location = review.location
 
-    review.update!(reply: @reply_draft.body, reply_status: "sent", replied_at: Time.current)
+    # Try GBP API if connected
+    if location.google_connected? && location.google_account_id.present? && location.google_location_id.present? && review.external_review_id.present?
+      poster = Replies::GoogleBusinessPoster.new(review, @reply_draft.body)
+      google_success = poster.call
+    else
+      google_success = false
+    end
+
+    review.update!(reply: @reply_draft.body, reply_status: google_success ? "sent" : "manual", replied_at: Time.current)
     @reply_draft.update!(status: "approved")
 
     if google_success
-      notice = "Reply sent successfully and posted to Google Business Profile."
+      redirect_to review, notice: "Reply posted to Google Business Profile successfully! ✓"
     else
-      notice = "Reply saved locally. Could not post to Google: #{poster.error}"
+      # Fallback: redirect to manual post page
+      redirect_to manual_post_review_path(review)
     end
-
-    redirect_to review, notice: notice
   end
 
   private

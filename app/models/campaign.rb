@@ -31,12 +31,8 @@ class Campaign < ApplicationRecord
   end
 
   def qr_code_url
-    if Rails.env.production?
-      host = ENV['APP_HOST'] || 'reputable.com'
-      "https://#{host}/c/#{slug}"
-    else
-      "http://localhost:3000/c/#{slug}"
-    end
+    host = ENV['APP_HOST'] || 'sumarx.sajjadumar.dev'
+    "https://#{host}/c/#{slug}"
   end
 
   private

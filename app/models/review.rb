@@ -10,7 +10,7 @@ class Review < ApplicationRecord
   validates :platform, presence: true, inclusion: { in: %w[google facebook tripadvisor yelp] }
   validates :external_review_id, presence: true, uniqueness: { scope: [:account_id, :platform] }
   validates :rating, numericality: { in: 1..5 }, allow_nil: true
-  validates :reply_status, inclusion: { in: %w[pending draft approved sent] }
+  validates :reply_status, inclusion: { in: %w[pending draft approved sent manual] }
   validates :sentiment, inclusion: { in: %w[positive neutral negative] }, allow_nil: true
   validates :sentiment_score, numericality: { in: -1.0..1.0 }, allow_nil: true
 
@@ -23,8 +23,8 @@ class Review < ApplicationRecord
   scope :with_rating, ->(rating) { where(rating: rating) }
   scope :high_rating, -> { where(rating: 4..5) }
   scope :low_rating, -> { where(rating: 1..3) }
-  scope :replied, -> { where(reply_status: 'sent') }
-  scope :unreplied, -> { where.not(reply_status: 'sent') }
+  scope :replied, -> { where(reply_status: %w[sent manual]) }
+  scope :unreplied, -> { where.not(reply_status: %w[sent manual]) }
   scope :published_after, ->(date) { where('published_at > ?', date) }
   scope :published_before, ->(date) { where('published_at < ?', date) }
 
@@ -44,7 +44,7 @@ class Review < ApplicationRecord
   end
 
   def replied?
-    reply_status == 'sent'
+    reply_status.in?(%w[sent manual])
   end
 
   def needs_reply?

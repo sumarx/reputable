@@ -67,7 +67,15 @@ module Reviews
       return :skipped if external_id.blank?
 
       existing = @location.reviews.find_by(platform: "google", external_review_id: external_id)
-      return :skipped if existing
+      if existing
+        # Update reply if Google has one and we don't
+        owner_reply = review_data.dig("reviewReply", "comment")
+        if owner_reply.present? && existing.reply.blank?
+          replied_at = review_data.dig("reviewReply", "updateTime").present? ? Time.parse(review_data.dig("reviewReply", "updateTime")) : Time.current
+          existing.update!(reply: owner_reply, reply_status: "sent", replied_at: replied_at)
+        end
+        return :skipped
+      end
 
       author_name = review_data.dig("reviewer", "displayName") || "Anonymous"
       rating = review_data["starRating"]
@@ -82,6 +90,10 @@ module Reviews
       body = review_data["comment"] || ""
       published_at = review_data["createTime"].present? ? Time.parse(review_data["createTime"]) : Time.current
 
+      # Check if owner already replied on Google
+      owner_reply = review_data.dig("reviewReply", "comment")
+      has_reply = owner_reply.present?
+
       @location.reviews.create!(
         account: @account,
         platform: "google",
@@ -90,7 +102,9 @@ module Reviews
         rating: rating_value,
         body: body,
         published_at: published_at,
-        reply_status: "pending"
+        reply_status: has_reply ? "sent" : "pending",
+        reply: has_reply ? owner_reply : nil,
+        replied_at: has_reply ? (review_data.dig("reviewReply", "updateTime").present? ? Time.parse(review_data.dig("reviewReply", "updateTime")) : published_at) : nil
       )
 
       :created
