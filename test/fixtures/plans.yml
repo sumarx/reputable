@@ -1,0 +1,23 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  name: MyString
+  price_cents: 1
+  currency: MyString
+  max_locations: 1
+  max_campaigns: 1
+  max_reviews_per_month: 1
+  features: 
+  active: false
+  position: 1
+
+two:
+  name: MyString
+  price_cents: 1
+  currency: MyString
+  max_locations: 1
+  max_campaigns: 1
+  max_reviews_per_month: 1
+  features: 
+  active: false
+  position: 1

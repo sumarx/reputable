@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+    .header { background: #1f2937; color: white; padding: 20px; text-align: center; }
+    .content { background: white; padding: 30px; border: 1px solid #e5e7eb; }
+    .details-box { background: #f9fafb; padding: 20px; margin: 20px 0; border-radius: 8px; }
+    .footer { text-align: center; margin-top: 30px; color: #6b7280; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>New Payment Proof Submitted</h1>
+    </div>
+    
+    <div class="content">
+      <p>Hi Admin,</p>
+      
+      <p>A customer has submitted a payment proof for review:</p>
+      
+      <div class="details-box">
+        <h3>Payment Proof Details</h3>
+        <ul>
+          <li><strong>Account:</strong> <%= @account.name %></li>
+          <li><strong>Invoice:</strong> <%= @invoice.number %></li>
+          <li><strong>Amount:</strong> <%= @invoice.amount_formatted %></li>
+          <li><strong>Submitted:</strong> <%= @payment_proof.submitted_at.strftime("%B %d, %Y at %l:%M %p") %></li>
+          <li><strong>File:</strong> <%= @payment_proof.file.filename if @payment_proof.file.attached? %></li>
+        </ul>
+      </div>
+      
+      <p>Please review the payment proof and approve/reject it in the admin panel.</p>
+      
+      <p>Login to RepuTable to review: <%= Rails.application.routes.url_helpers.billing_invoice_url(@invoice, host: 'reputable.co') %></p>
+      
+      <p>Thanks,<br>
+      RepuTable System</p>
+    </div>
+    
+    <div class="footer">
+      <p>RepuTable - Reputation Management Made Simple</p>
+    </div>
+  </div>
+</body>
+</html>

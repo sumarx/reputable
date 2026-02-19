@@ -47,6 +47,15 @@ Rails.application.routes.draw do
   get "analytics", to: "analytics#show"
   resource :settings, only: [:show, :update]
 
+  # Billing routes
+  namespace :billing do
+    get "/", to: "overview#show", as: :overview
+    resources :plans, only: [:index]
+    resources :invoices, only: [:index, :show] do
+      resources :payment_proofs, only: [:create]
+    end
+  end
+
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.

@@ -1,0 +1,144 @@
+<% content_for :page_title, "Billing" %>
+
+<div class="max-w-4xl space-y-6">
+  <%# Quick nav %>
+  <div class="flex flex-wrap gap-2">
+    <%= link_to billing_plans_path, class: "inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-200 text-gray-700 bg-white hover:bg-gray-50 cursor-pointer transition-colors" do %>
+      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path></svg>
+      View Plans
+    <% end %>
+    <%= link_to billing_invoices_path, class: "inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-200 text-gray-700 bg-white hover:bg-gray-50 cursor-pointer transition-colors" do %>
+      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+      Invoices
+    <% end %>
+  </div>
+
+  <!-- Current Plan -->
+  <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+    <div class="flex items-center justify-between mb-6">
+      <h3 class="text-lg font-medium text-gray-900">Current Plan</h3>
+      <% if @subscription&.on_trial? %>
+        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+          Trial - <%= pluralize(@subscription.days_until_trial_ends, 'day') %> left
+        </span>
+      <% elsif @subscription&.active? %>
+        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+          Active
+        </span>
+      <% elsif @subscription&.past_due? %>
+        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+          Past Due
+        </span>
+      <% elsif @subscription&.suspended? %>
+        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+          Suspended
+        </span>
+      <% end %>
+    </div>
+
+    <% if @current_plan %>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <h4 class="text-xl font-semibold text-gray-900 mb-2"><%= @current_plan.name %></h4>
+          <p class="text-2xl font-bold text-indigo-600 mb-4"><%= @current_plan.price_formatted %>/month</p>
+          
+          <div class="space-y-2 text-sm text-gray-600">
+            <div class="flex justify-between">
+              <span>Locations:</span>
+              <span class="font-medium"><%= @usage_stats[:locations] %> / <%= @current_plan.max_locations %></span>
+            </div>
+            <div class="flex justify-between">
+              <span>Campaigns:</span>
+              <span class="font-medium"><%= @usage_stats[:campaigns] %> / <%= @current_plan.max_campaigns %></span>
+            </div>
+            <div class="flex justify-between">
+              <span>Reviews this month:</span>
+              <span class="font-medium">
+                <%= @usage_stats[:reviews_this_month] %> / 
+                <%= @current_plan.unlimited_reviews? ? "Unlimited" : @current_plan.max_reviews_per_month %>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <h5 class="font-medium text-gray-900 mb-3">Next Invoice</h5>
+          <% if @next_invoice_date %>
+            <p class="text-sm text-gray-600 mb-2">Due Date: <span class="font-medium"><%= @next_invoice_date.strftime("%B %d, %Y") %></span></p>
+            <p class="text-sm text-gray-600">Amount: <span class="font-medium"><%= @current_plan.price_formatted %></span></p>
+          <% else %>
+            <p class="text-sm text-gray-500">No upcoming invoices</p>
+          <% end %>
+        </div>
+      </div>
+    <% else %>
+      <div class="text-center py-8">
+        <p class="text-gray-500">No active subscription found.</p>
+      </div>
+    <% end %>
+  </div>
+
+  <!-- Recent Invoices -->
+  <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+    <div class="flex items-center justify-between mb-6">
+      <h3 class="text-lg font-medium text-gray-900">Recent Invoices</h3>
+      <%= link_to billing_invoices_path, class: "text-sm text-indigo-600 hover:text-indigo-500 font-medium" do %>
+        View all →
+      <% end %>
+    </div>
+
+    <% if @recent_invoices.any? %>
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Invoice</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Due Date</th>
+              <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            <% @recent_invoices.each do |invoice| %>
+              <tr>
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                  <%= invoice.number %>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <%= invoice.amount_formatted %>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <% case invoice.status %>
+                  <% when 'paid' %>
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                      Paid
+                    </span>
+                  <% when 'pending' %>
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                      Pending
+                    </span>
+                  <% when 'overdue' %>
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                      Overdue
+                    </span>
+                  <% end %>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <%= invoice.due_at.strftime("%m/%d/%Y") %>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                  <%= link_to "View", billing_invoice_path(invoice), class: "text-indigo-600 hover:text-indigo-900" %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% else %>
+      <div class="text-center py-8">
+        <p class="text-gray-500">No invoices yet.</p>
+      </div>
+    <% end %>
+  </div>
+</div>

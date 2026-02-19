@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_18_094553) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_18_103519) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -58,6 +58,29 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_18_094553) do
     t.index ["slug"], name: "index_campaigns_on_slug", unique: true
   end
 
+  create_table "invoices", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.integer "amount_cents", null: false
+    t.datetime "created_at", null: false
+    t.string "currency", default: "PKR", null: false
+    t.date "due_at", null: false
+    t.date "issued_at", null: false
+    t.text "notes"
+    t.string "number", null: false
+    t.datetime "paid_at"
+    t.string "payment_method"
+    t.string "payment_reference"
+    t.string "status", default: "pending", null: false
+    t.bigint "subscription_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id", "status"], name: "index_invoices_on_account_id_and_status"
+    t.index ["account_id"], name: "index_invoices_on_account_id"
+    t.index ["due_at"], name: "index_invoices_on_due_at"
+    t.index ["number"], name: "index_invoices_on_number", unique: true
+    t.index ["status"], name: "index_invoices_on_status"
+    t.index ["subscription_id"], name: "index_invoices_on_subscription_id"
+  end
+
   create_table "locations", force: :cascade do |t|
     t.bigint "account_id", null: false
     t.string "address"
@@ -94,6 +117,37 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_18_094553) do
     t.datetime "updated_at", null: false
     t.bigint "user_id", null: false
     t.index ["user_id"], name: "index_notification_settings_on_user_id"
+  end
+
+  create_table "payment_proofs", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.text "admin_notes"
+    t.datetime "created_at", null: false
+    t.bigint "invoice_id", null: false
+    t.datetime "reviewed_at"
+    t.string "status", default: "pending_review", null: false
+    t.datetime "submitted_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_payment_proofs_on_account_id"
+    t.index ["invoice_id"], name: "index_payment_proofs_on_invoice_id"
+    t.index ["status"], name: "index_payment_proofs_on_status"
+    t.index ["submitted_at"], name: "index_payment_proofs_on_submitted_at"
+  end
+
+  create_table "plans", force: :cascade do |t|
+    t.boolean "active", default: true, null: false
+    t.datetime "created_at", null: false
+    t.string "currency", default: "PKR", null: false
+    t.jsonb "features", default: "{}", null: false
+    t.integer "max_campaigns", null: false
+    t.integer "max_locations", null: false
+    t.integer "max_reviews_per_month", null: false
+    t.string "name", null: false
+    t.integer "position", null: false
+    t.integer "price_cents", null: false
+    t.datetime "updated_at", null: false
+    t.index ["active"], name: "index_plans_on_active"
+    t.index ["position"], name: "index_plans_on_position"
   end
 
   create_table "platform_connections", force: :cascade do |t|
@@ -157,6 +211,23 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_18_094553) do
     t.index ["user_id"], name: "index_sessions_on_user_id"
   end
 
+  create_table "subscriptions", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.datetime "cancelled_at"
+    t.datetime "created_at", null: false
+    t.date "current_period_end"
+    t.date "current_period_start"
+    t.bigint "plan_id", null: false
+    t.string "status", default: "trial", null: false
+    t.datetime "trial_ends_at"
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_subscriptions_on_account_id"
+    t.index ["current_period_end"], name: "index_subscriptions_on_current_period_end"
+    t.index ["plan_id"], name: "index_subscriptions_on_plan_id"
+    t.index ["status"], name: "index_subscriptions_on_status"
+    t.index ["trial_ends_at"], name: "index_subscriptions_on_trial_ends_at"
+  end
+
   create_table "users", force: :cascade do |t|
     t.bigint "account_id", null: false
     t.datetime "created_at", null: false
@@ -172,12 +243,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_18_094553) do
   add_foreign_key "campaign_responses", "campaigns"
   add_foreign_key "campaigns", "accounts"
   add_foreign_key "campaigns", "locations"
+  add_foreign_key "invoices", "accounts"
+  add_foreign_key "invoices", "subscriptions"
   add_foreign_key "locations", "accounts"
   add_foreign_key "notification_settings", "users"
+  add_foreign_key "payment_proofs", "accounts"
+  add_foreign_key "payment_proofs", "invoices"
   add_foreign_key "platform_connections", "locations"
   add_foreign_key "reply_drafts", "reviews"
   add_foreign_key "reviews", "accounts"
   add_foreign_key "reviews", "locations"
   add_foreign_key "sessions", "users"
+  add_foreign_key "subscriptions", "accounts"
+  add_foreign_key "subscriptions", "plans"
   add_foreign_key "users", "accounts"
 end

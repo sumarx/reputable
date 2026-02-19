@@ -1,0 +1,22 @@
+New Invoice Generated - RepuTable
+
+Hi <%= @user.name || @user.email_address %>,
+
+A new invoice has been generated for your RepuTable account:
+
+Invoice Details:
+- Invoice Number: <%= @invoice.number %>
+- Amount: <%= @invoice.amount_formatted %>
+- Due Date: <%= @invoice.due_at.strftime("%B %d, %Y") %>
+- Plan: <%= @invoice.subscription.plan.name %>
+
+Please log in to your account to view the full invoice and make payment:
+<%= Rails.application.routes.url_helpers.billing_invoice_url(@invoice, host: 'reputable.co') %>
+
+If you have any questions about your invoice, please don't hesitate to contact us.
+
+Thanks,
+The RepuTable Team
+
+--
+RepuTable - Reputation Management Made Simple

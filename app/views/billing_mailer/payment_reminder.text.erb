@@ -1,0 +1,25 @@
+Payment Overdue - RepuTable
+
+Hi <%= @user.name || @user.email_address %>,
+
+Your RepuTable invoice is now OVERDUE. Please make payment immediately to avoid service interruption.
+
+Overdue Invoice Details:
+- Invoice Number: <%= @invoice.number %>
+- Amount: <%= @invoice.amount_formatted %>
+- Original Due Date: <%= @invoice.due_at.strftime("%B %d, %Y") %>
+- Days Overdue: <%= @invoice.days_overdue %>
+
+IMPORTANT: Your account will be suspended if payment is not received within 7 days of the due date.
+
+Pay now: <%= Rails.application.routes.url_helpers.billing_invoice_url(@invoice, host: 'reputable.co') %>
+
+If you've already made payment, please upload your payment receipt in your account.
+
+Contact us immediately if you have any questions or concerns.
+
+Thanks,
+The RepuTable Team
+
+--
+RepuTable - Reputation Management Made Simple

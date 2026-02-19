@@ -1,0 +1,156 @@
+<% content_for :page_title, "Plans & Pricing" %>
+
+<div class="space-y-6">
+  <%# Header %>
+  <div class="text-center">
+    <h2 class="text-xl font-bold text-gray-900">Choose Your Plan</h2>
+    <p class="text-sm text-gray-500 mt-1">Simple, transparent pricing. All plans include a 14-day free trial.</p>
+  </div>
+
+  <%# Plan Cards %>
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <% @plans.each do |plan| %>
+      <% is_current = @current_plan&.id == plan.id %>
+      <% is_popular = plan.name == "Pro" %>
+
+      <div class="relative bg-white rounded-2xl border-2 <%= is_popular ? 'border-indigo-500 shadow-lg shadow-indigo-100' : 'border-gray-100 shadow-sm' %> overflow-hidden flex flex-col">
+        <% if is_popular %>
+          <div class="bg-indigo-600 text-white text-center py-1 text-xs font-semibold tracking-wide">MOST POPULAR</div>
+        <% end %>
+
+        <div class="p-5 flex-1 flex flex-col">
+          <%# Plan name %>
+          <h3 class="text-lg font-bold text-gray-900"><%= plan.name %></h3>
+
+          <%# Price %>
+          <div class="mt-3 mb-5">
+            <div class="flex items-baseline gap-1">
+              <span class="text-3xl font-extrabold text-gray-900">₨<%= number_with_delimiter(plan.price_cents / 100) %></span>
+              <span class="text-sm text-gray-500">/month</span>
+            </div>
+          </div>
+
+          <%# Features list %>
+          <ul class="space-y-2.5 flex-1">
+            <%# Locations %>
+            <li class="flex items-start gap-2 text-sm">
+              <svg class="w-4 h-4 text-green-500 mt-0.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+              <span class="text-gray-700"><strong><%= plan.max_locations %></strong> <%= "location".pluralize(plan.max_locations) %></span>
+            </li>
+
+            <%# Campaigns %>
+            <li class="flex items-start gap-2 text-sm">
+              <svg class="w-4 h-4 text-green-500 mt-0.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+              <span class="text-gray-700">
+                <% if plan.max_campaigns == -1 %>
+                  <strong>Unlimited</strong> campaigns
+                <% else %>
+                  <strong><%= plan.max_campaigns %></strong> <%= "campaign".pluralize(plan.max_campaigns) %>
+                <% end %>
+              </span>
+            </li>
+
+            <%# Reviews %>
+            <li class="flex items-start gap-2 text-sm">
+              <svg class="w-4 h-4 text-green-500 mt-0.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+              <span class="text-gray-700">
+                <% if plan.max_reviews_per_month == -1 %>
+                  <strong>Unlimited</strong> reviews/month
+                <% else %>
+                  <strong><%= plan.max_reviews_per_month %></strong> reviews/month
+                <% end %>
+              </span>
+            </li>
+
+            <%# AI Replies %>
+            <li class="flex items-start gap-2 text-sm">
+              <svg class="w-4 h-4 text-green-500 mt-0.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+              <span class="text-gray-700">AI-powered reply drafts</span>
+            </li>
+
+            <%# QR Campaigns %>
+            <li class="flex items-start gap-2 text-sm">
+              <svg class="w-4 h-4 text-green-500 mt-0.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+              <span class="text-gray-700">QR code campaigns</span>
+            </li>
+
+            <%# Sentiment Analysis %>
+            <li class="flex items-start gap-2 text-sm">
+              <svg class="w-4 h-4 text-green-500 mt-0.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+              <span class="text-gray-700">Sentiment analysis</span>
+            </li>
+
+            <%# Google sync %>
+            <li class="flex items-start gap-2 text-sm">
+              <svg class="w-4 h-4 text-green-500 mt-0.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+              <span class="text-gray-700">Google Business sync</span>
+            </li>
+
+            <%# Email notifications %>
+            <li class="flex items-start gap-2 text-sm">
+              <svg class="w-4 h-4 text-green-500 mt-0.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+              <span class="text-gray-700">Email & Slack notifications</span>
+            </li>
+
+            <%# Pro+ features %>
+            <% if plan.features&.dig("priority_support") %>
+              <li class="flex items-start gap-2 text-sm">
+                <svg class="w-4 h-4 text-indigo-500 mt-0.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+                <span class="text-gray-700"><strong>Priority support</strong></span>
+              </li>
+            <% end %>
+
+            <% if plan.features&.dig("advanced_analytics") %>
+              <li class="flex items-start gap-2 text-sm">
+                <svg class="w-4 h-4 text-indigo-500 mt-0.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+                <span class="text-gray-700"><strong>Advanced analytics</strong></span>
+              </li>
+            <% end %>
+          </ul>
+
+          <%# CTA button %>
+          <div class="mt-5">
+            <% if is_current %>
+              <div class="w-full text-center py-2.5 text-sm font-semibold rounded-xl border-2 border-indigo-200 text-indigo-600 bg-indigo-50">
+                Current Plan
+              </div>
+            <% else %>
+              <%= link_to billing_overview_path, class: "block w-full text-center py-2.5 text-sm font-semibold rounded-xl text-white #{is_popular ? 'bg-indigo-600 hover:bg-indigo-700 shadow-md shadow-indigo-200' : 'bg-gray-900 hover:bg-gray-800'} transition-all cursor-pointer" do %>
+                <% if @current_plan && plan.price_cents > @current_plan.price_cents %>
+                  Upgrade to <%= plan.name %>
+                <% elsif @current_plan %>
+                  Switch to <%= plan.name %>
+                <% else %>
+                  Start Free Trial
+                <% end %>
+              <% end %>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <%# FAQ / Info %>
+  <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+    <h3 class="text-sm font-semibold text-gray-900 mb-3">Frequently Asked Questions</h3>
+    <div class="space-y-3">
+      <div>
+        <p class="text-sm font-medium text-gray-700">How does the free trial work?</p>
+        <p class="text-xs text-gray-500 mt-0.5">Every new account gets 14 days free on any plan. No payment required upfront.</p>
+      </div>
+      <div>
+        <p class="text-sm font-medium text-gray-700">How do I pay?</p>
+        <p class="text-xs text-gray-500 mt-0.5">We accept bank transfers (Meezan Bank). After your trial, we'll generate a monthly invoice with bank details. Upload your payment receipt and we'll confirm within 24 hours.</p>
+      </div>
+      <div>
+        <p class="text-sm font-medium text-gray-700">Can I change plans?</p>
+        <p class="text-xs text-gray-500 mt-0.5">Yes! Contact us to upgrade or downgrade. Changes take effect on your next billing cycle.</p>
+      </div>
+      <div>
+        <p class="text-sm font-medium text-gray-700">What happens if I don't pay?</p>
+        <p class="text-xs text-gray-500 mt-0.5">You'll get email reminders. After a 7-day grace period, your account will be paused until payment is received. No data is deleted.</p>
+      </div>
+    </div>
+  </div>
+</div>

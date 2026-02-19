@@ -1,0 +1,17 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  invoice: one
+  account: one
+  status: MyString
+  admin_notes: MyText
+  submitted_at: 2026-02-18 10:35:19
+  reviewed_at: 2026-02-18 10:35:19
+
+two:
+  invoice: two
+  account: two
+  status: MyString
+  admin_notes: MyText
+  submitted_at: 2026-02-18 10:35:19
+  reviewed_at: 2026-02-18 10:35:19
