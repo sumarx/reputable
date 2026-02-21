@@ -14,7 +14,7 @@
       <div class="flex gap-6">
         <% tab = params[:review_tab] || "all" %>
         <% [["all", "All"], ["needs_reply", "Needs Reply"], ["negative", "Negative"]].each do |key, label| %>
-          <%= link_to label, dashboard_path(period: @period, review_tab: key, location_id: @current_location&.id),
+          <%= link_to label, dashboard_path(period: @period, review_tab: key),
               data: { turbo_frame: "recent_reviews_frame" },
               class: "pb-2.5 text-sm font-medium border-b-2 transition-colors -mb-px",
               style: tab == key ? "border-color: #4F46E5; color: #4F46E5;" : "border-color: transparent; color: #9CA3AF;" %>

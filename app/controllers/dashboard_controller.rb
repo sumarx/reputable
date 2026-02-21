@@ -1,6 +1,5 @@
 class DashboardController < ApplicationController
   before_action :resume_session
-  include LocationFilterable
 
   def locations
     @account = Current.account

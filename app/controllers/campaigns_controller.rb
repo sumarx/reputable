@@ -1,6 +1,5 @@
 class CampaignsController < ApplicationController
   before_action :resume_session
-  include LocationFilterable
   before_action :set_campaign, only: [:show, :edit, :update, :destroy, :qr_code]
 
   def index

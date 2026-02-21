@@ -45,6 +45,27 @@
             </button>
           </div>
           
+          <!-- Location Selector -->
+          <% if Current.account && Current.account.locations.count > 1 %>
+            <div class="px-4 pt-4 pb-2">
+              <label class="text-[10px] text-gray-500 uppercase tracking-wider font-semibold px-1 mb-1 block">Location</label>
+              <select onchange="window.location.href=this.value"
+                      class="w-full rounded-lg border-0 text-sm font-medium text-white py-2 px-3 appearance-none cursor-pointer focus:ring-2 focus:ring-indigo-500"
+                      style="background-color: #374151; background-image: url('data:image/svg+xml;charset=utf-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 fill=%22none%22 viewBox=%220 0 20 20%22%3E%3Cpath stroke=%22%239CA3AF%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 stroke-width=%222%22 d=%22M6 8l4 4 4-4%22/%3E%3C/svg%3E'); background-position: right 0.5rem center; background-repeat: no-repeat; background-size: 1.25em 1.25em; padding-right: 2rem;">
+                <option value="<%= url_for(request.query_parameters.except(:location_id).merge(location_id: '')) %>"
+                        <%= 'selected' unless @current_location %>>
+                  📍 All Locations
+                </option>
+                <% Current.account.locations.order(:name).each do |loc| %>
+                  <option value="<%= url_for(request.query_parameters.except(:location_id).merge(location_id: loc.id)) %>"
+                          <%= 'selected' if @current_location&.id == loc.id %>>
+                    📍 <%= loc.name %>
+                  </option>
+                <% end %>
+              </select>
+            </div>
+          <% end %>
+
           <!-- Navigation -->
           <nav class="flex-1 px-4 py-6 space-y-2">
             <%= link_to dashboard_path, class: nav_link_classes(current_page_match?(dashboard_path)) do %>

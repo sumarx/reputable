@@ -39,6 +39,11 @@ class ReviewsController < ApplicationController
   def filter_reviews
     reviews = Current.account.reviews.recent
 
+    # Apply global location filter from sidebar
+    if @current_location && filter_params[:location_id].blank?
+      reviews = reviews.where(location_id: @current_location.id)
+    end
+
     if filter_params[:platform].present?
       reviews = reviews.by_platform(filter_params[:platform])
     end
