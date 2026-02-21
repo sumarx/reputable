@@ -132,7 +132,7 @@
     </div>
 
     <%# Quick Actions — beautiful cards %>
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-5">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-5">
       <%= link_to new_location_path, class: "group block", data: { turbo_frame: "_top" } do %>
         <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5 hover:shadow-md hover:border-indigo-200 transition-all">
           <div class="flex items-center gap-4">
@@ -173,6 +173,22 @@
             </div>
           </div>
         </div>
+      <% end %>
+
+      <% if Current.account.locations.count > 1 %>
+        <%= link_to locations_comparison_path, class: "group block", data: { turbo_frame: "_top" } do %>
+          <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5 hover:shadow-md hover:border-purple-200 transition-all">
+            <div class="flex items-center gap-4">
+              <div class="w-12 h-12 rounded-xl flex items-center justify-center shrink-0" style="background-color: #F3E8FF;">
+                <svg class="w-6 h-6" style="color: #7C3AED;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+              </div>
+              <div>
+                <p class="text-sm font-semibold text-gray-900 group-hover:text-purple-600 transition-colors">Compare Locations</p>
+                <p class="text-xs text-gray-500 mt-0.5"><%= Current.account.locations.count %> locations side by side</p>
+              </div>
+            </div>
+          </div>
+        <% end %>
       <% end %>
     </div>
   </turbo-frame>

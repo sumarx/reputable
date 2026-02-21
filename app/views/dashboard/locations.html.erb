@@ -5,8 +5,8 @@
     <%# Header + Filter %>
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
       <div>
-        <h1 class="text-xl font-bold text-gray-900">Location Comparison</h1>
-        <p class="text-sm text-gray-500"><%= @locations.count %> locations side by side</p>
+        <h1 class="text-xl font-bold text-gray-900">Compare Locations</h1>
+        <p class="text-sm text-gray-500"><%= @locations.count %> locations · side-by-side performance</p>
       </div>
       <div class="flex items-center gap-2">
         <%= link_to "← Dashboard", dashboard_path, class: "text-xs font-medium text-gray-500 hover:text-gray-700", data: { turbo_frame: "_top" } %>
@@ -28,159 +28,135 @@
       </div>
     <% else %>
 
-      <%# Comparison Cards %>
-      <div class="grid grid-cols-1 md:grid-cols-<%= [@locations.count, 3].min %> gap-5 mt-5">
-        <% @location_stats.each do |ls| %>
-          <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-            <%# Location Header %>
-            <div class="px-5 py-4 border-b border-gray-100" style="background: linear-gradient(135deg, #EEF2FF, #F5F3FF);">
-              <h3 class="text-base font-bold text-gray-900"><%= ls[:location].name %></h3>
-              <p class="text-xs text-gray-500 mt-0.5">
-                <%= ls[:campaign_count] %> active campaign<%= ls[:campaign_count] == 1 ? '' : 's' %>
-                <% if ls[:top_platform] %> · Top: <%= ls[:top_platform].capitalize %><% end %>
-              </p>
-            </div>
-
-            <%# KPI Grid %>
-            <div class="grid grid-cols-2 divide-x divide-y divide-gray-100">
-              <div class="p-4 text-center">
-                <p class="text-2xl font-bold text-gray-900"><%= ls[:kpi][:total_reviews][:value] %></p>
-                <p class="text-xs text-gray-500 mt-0.5">Reviews</p>
-                <% trend = ls[:kpi][:total_reviews][:trend] %>
-                <% if trend && trend != 0 %>
-                  <p class="text-[11px] font-medium mt-1" style="color: <%= trend > 0 ? '#059669' : '#E11D48' %>;">
-                    <%= trend > 0 ? '↑' : '↓' %> <%= trend.abs %>%
-                  </p>
-                <% end %>
-              </div>
-
-              <div class="p-4 text-center">
-                <p class="text-2xl font-bold text-gray-900"><%= ls[:kpi][:average_rating][:value] %></p>
-                <p class="text-xs text-gray-500 mt-0.5">Avg Rating</p>
-                <% trend = ls[:kpi][:average_rating][:trend] %>
-                <% if trend && trend != 0 %>
-                  <p class="text-[11px] font-medium mt-1" style="color: <%= trend > 0 ? '#059669' : '#E11D48' %>;">
-                    <%= trend > 0 ? '↑' : '↓' %> <%= trend.abs %>%
-                  </p>
-                <% end %>
-              </div>
-
-              <div class="p-4 text-center">
-                <p class="text-2xl font-bold" style="color: <%= ls[:kpi][:sentiment_score][:value] > 50 ? '#059669' : ls[:kpi][:sentiment_score][:value] > 20 ? '#D97706' : '#E11D48' %>;">
-                  <%= ls[:kpi][:sentiment_score][:value] %>%
-                </p>
-                <p class="text-xs text-gray-500 mt-0.5">Sentiment</p>
-              </div>
-
-              <div class="p-4 text-center">
-                <p class="text-2xl font-bold" style="color: <%= ls[:unreplied] > 0 ? '#D97706' : '#059669' %>;">
-                  <%= ls[:unreplied] %>
-                </p>
-                <p class="text-xs text-gray-500 mt-0.5">Unreplied</p>
-              </div>
-            </div>
-
-            <%# Rating Distribution mini %>
-            <div class="px-5 py-3 border-t border-gray-100">
-              <p class="text-[11px] text-gray-400 uppercase tracking-wider font-semibold mb-2">Rating Breakdown</p>
-              <% dist = ls[:stats].rating_distribution %>
-              <div class="space-y-1.5">
-                <% dist.each do |row| %>
-                  <div class="flex items-center gap-2">
-                    <span class="text-[11px] text-gray-500 w-6 text-right"><%= row[:star] %>★</span>
-                    <div class="flex-1 rounded-full h-2 overflow-hidden" style="background-color: #F3F4F6;">
-                      <% bar_color = row[:star] >= 4 ? '#6366F1' : row[:star] == 3 ? '#FBBF24' : '#FB7185' %>
-                      <div class="h-full rounded-full" style="width: <%= [row[:percentage], 3].max %>%; background-color: <%= bar_color %>;"></div>
-                    </div>
-                    <span class="text-[11px] text-gray-400 w-8 text-right"><%= row[:count] %></span>
-                  </div>
-                <% end %>
-              </div>
-            </div>
-
-            <%# Action %>
-            <div class="px-5 py-3 border-t border-gray-100">
-              <%= link_to "View Dashboard →", dashboard_path(location_id: ls[:location].id),
-                  class: "text-xs font-medium hover:opacity-80", style: "color: #4F46E5;", data: { turbo_frame: "_top" } %>
-            </div>
-          </div>
-        <% end %>
-      </div>
-
-      <%# Comparison Chart — Rating Trend %>
-      <div class="bg-white rounded-xl border border-gray-100 shadow-sm mt-5">
-        <div class="px-5 py-3 border-b border-gray-100">
-          <h3 class="text-sm font-semibold text-gray-900">Rating Trend Comparison</h3>
-          <p class="text-xs text-gray-400">Average rating over time by location</p>
-        </div>
-        <div class="p-4">
-          <% chart_data = @location_stats.map { |ls| { name: ls[:location].name, data: ls[:stats].rating_trend_data } } %>
-          <%= line_chart chart_data, height: "280px", colors: ["#6366F1", "#10B981", "#F59E0B", "#F43F5E"],
-              library: { scales: { y: { min: 1, max: 5 } } } %>
-        </div>
-      </div>
-
-      <%# Review Volume Comparison %>
-      <div class="bg-white rounded-xl border border-gray-100 shadow-sm mt-5">
-        <div class="px-5 py-3 border-b border-gray-100">
-          <h3 class="text-sm font-semibold text-gray-900">Review Volume Comparison</h3>
-          <p class="text-xs text-gray-400">Number of reviews per location over time</p>
-        </div>
-        <div class="p-4">
-          <% volume_data = @location_stats.map { |ls| { name: ls[:location].name, data: ls[:stats].review_volume_data } } %>
-          <%= column_chart volume_data, height: "280px", colors: ["#6366F1", "#10B981", "#F59E0B", "#F43F5E"], stacked: true %>
-        </div>
-      </div>
-
-      <%# Summary Table %>
-      <div class="bg-white rounded-xl border border-gray-100 shadow-sm mt-5">
-        <div class="px-5 py-3 border-b border-gray-100">
-          <h3 class="text-sm font-semibold text-gray-900">At a Glance</h3>
-        </div>
+      <%# Main Comparison Table %>
+      <div class="bg-white rounded-xl border border-gray-100 shadow-sm mt-4 overflow-hidden">
         <div class="overflow-x-auto">
           <table class="w-full text-sm">
             <thead>
-              <tr class="border-b border-gray-100" style="background-color: #F9FAFB;">
-                <th class="text-left px-5 py-3 text-xs text-gray-500 font-semibold uppercase tracking-wider">Location</th>
-                <th class="text-center px-4 py-3 text-xs text-gray-500 font-semibold uppercase tracking-wider">Reviews</th>
-                <th class="text-center px-4 py-3 text-xs text-gray-500 font-semibold uppercase tracking-wider">Rating</th>
-                <th class="text-center px-4 py-3 text-xs text-gray-500 font-semibold uppercase tracking-wider">Sentiment</th>
-                <th class="text-center px-4 py-3 text-xs text-gray-500 font-semibold uppercase tracking-wider">Response</th>
-                <th class="text-center px-4 py-3 text-xs text-gray-500 font-semibold uppercase tracking-wider">Unreplied</th>
-                <th class="text-center px-4 py-3 text-xs text-gray-500 font-semibold uppercase tracking-wider">Campaigns</th>
+              <tr style="background-color: #F9FAFB;">
+                <th class="text-left px-5 py-3.5 text-xs text-gray-500 font-semibold uppercase tracking-wider sticky left-0 bg-gray-50 z-10">Location</th>
+                <th class="text-center px-4 py-3.5 text-xs text-gray-500 font-semibold uppercase tracking-wider">Reviews</th>
+                <th class="text-center px-4 py-3.5 text-xs text-gray-500 font-semibold uppercase tracking-wider">Avg Rating</th>
+                <th class="text-center px-4 py-3.5 text-xs text-gray-500 font-semibold uppercase tracking-wider">Sentiment</th>
+                <th class="text-center px-4 py-3.5 text-xs text-gray-500 font-semibold uppercase tracking-wider">Response Rate</th>
+                <th class="text-center px-4 py-3.5 text-xs text-gray-500 font-semibold uppercase tracking-wider">Unreplied</th>
+                <th class="text-center px-4 py-3.5 text-xs text-gray-500 font-semibold uppercase tracking-wider">Campaigns</th>
+                <th class="text-center px-4 py-3.5 text-xs text-gray-500 font-semibold uppercase tracking-wider">Top Platform</th>
+                <th class="text-center px-4 py-3.5 text-xs text-gray-500 font-semibold uppercase tracking-wider">Rating Breakdown</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-gray-50">
+            <tbody class="divide-y divide-gray-100">
               <% @location_stats.each do |ls| %>
                 <tr class="hover:bg-gray-50/50">
-                  <td class="px-5 py-3">
-                    <%= link_to ls[:location].name, dashboard_path(location_id: ls[:location].id),
-                        class: "font-medium text-gray-900 hover:text-indigo-600", data: { turbo_frame: "_top" } %>
+                  <%# Location Name %>
+                  <td class="px-5 py-4 sticky left-0 bg-white z-10">
+                    <div>
+                      <%= link_to ls[:location].name, dashboard_path(location_id: ls[:location].id),
+                          class: "font-semibold text-gray-900 hover:text-indigo-600", data: { turbo_frame: "_top" } %>
+                      <p class="text-[11px] text-gray-400 mt-0.5"><%= ls[:location].address if ls[:location].respond_to?(:address) && ls[:location].address.present? %></p>
+                    </div>
                   </td>
-                  <td class="text-center px-4 py-3 font-semibold text-gray-900"><%= ls[:kpi][:total_reviews][:value] %></td>
-                  <td class="text-center px-4 py-3">
-                    <span class="text-amber-500"><%= '★' * ls[:kpi][:average_rating][:value].round %><%= '☆' * (5 - ls[:kpi][:average_rating][:value].round) %></span>
-                    <span class="text-gray-500 ml-1"><%= ls[:kpi][:average_rating][:value] %></span>
-                  </td>
-                  <td class="text-center px-4 py-3">
-                    <span class="inline-flex px-2.5 py-1 rounded-full text-xs font-semibold"
-                          style="background-color: <%= ls[:kpi][:sentiment_score][:value] > 50 ? '#ECFDF5' : ls[:kpi][:sentiment_score][:value] > 20 ? '#FFFBEB' : '#FFF1F2' %>; color: <%= ls[:kpi][:sentiment_score][:value] > 50 ? '#059669' : ls[:kpi][:sentiment_score][:value] > 20 ? '#92400E' : '#E11D48' %>;">
-                      <%= ls[:kpi][:sentiment_score][:value] %>%
-                    </span>
-                  </td>
-                  <td class="text-center px-4 py-3 font-medium text-gray-900"><%= ls[:kpi][:response_rate][:value] %>%</td>
-                  <td class="text-center px-4 py-3">
-                    <% if ls[:unreplied] > 0 %>
-                      <span class="inline-flex px-2 py-0.5 rounded-full text-xs font-semibold" style="background-color: #FEF3C7; color: #92400E;"><%= ls[:unreplied] %></span>
-                    <% else %>
-                      <span class="text-gray-400">0</span>
+
+                  <%# Reviews %>
+                  <td class="text-center px-4 py-4">
+                    <p class="text-lg font-bold text-gray-900"><%= ls[:kpi][:total_reviews][:value] %></p>
+                    <% trend = ls[:kpi][:total_reviews][:trend] %>
+                    <% if trend && trend != 0 %>
+                      <p class="text-[11px] font-medium" style="color: <%= trend > 0 ? '#059669' : '#E11D48' %>;">
+                        <%= trend > 0 ? '↑' : '↓' %> <%= trend.abs %>%
+                      </p>
                     <% end %>
                   </td>
-                  <td class="text-center px-4 py-3 text-gray-500"><%= ls[:campaign_count] %></td>
+
+                  <%# Rating %>
+                  <td class="text-center px-4 py-4">
+                    <p class="text-lg font-bold text-gray-900"><%= ls[:kpi][:average_rating][:value] %></p>
+                    <p class="text-amber-500 text-xs"><%= '★' * ls[:kpi][:average_rating][:value].to_f.round %><%= '☆' * (5 - ls[:kpi][:average_rating][:value].to_f.round) %></p>
+                  </td>
+
+                  <%# Sentiment %>
+                  <td class="text-center px-4 py-4">
+                    <% score = ls[:kpi][:sentiment_score][:value] %>
+                    <span class="inline-flex px-2.5 py-1 rounded-full text-xs font-bold"
+                          style="background-color: <%= score > 50 ? '#ECFDF5' : score > 20 ? '#FFFBEB' : '#FFF1F2' %>; color: <%= score > 50 ? '#059669' : score > 20 ? '#92400E' : '#E11D48' %>;">
+                      <%= score %>%
+                    </span>
+                  </td>
+
+                  <%# Response Rate %>
+                  <td class="text-center px-4 py-4">
+                    <p class="text-sm font-semibold text-gray-900"><%= ls[:kpi][:response_rate][:value] %>%</p>
+                  </td>
+
+                  <%# Unreplied %>
+                  <td class="text-center px-4 py-4">
+                    <% if ls[:unreplied] > 0 %>
+                      <span class="inline-flex px-2.5 py-1 rounded-full text-xs font-bold" style="background-color: #FEF3C7; color: #92400E;"><%= ls[:unreplied] %></span>
+                    <% else %>
+                      <span class="inline-flex px-2.5 py-1 rounded-full text-xs font-bold" style="background-color: #ECFDF5; color: #059669;">0</span>
+                    <% end %>
+                  </td>
+
+                  <%# Campaigns %>
+                  <td class="text-center px-4 py-4 text-sm text-gray-700"><%= ls[:campaign_count] %></td>
+
+                  <%# Top Platform %>
+                  <td class="text-center px-4 py-4">
+                    <% if ls[:top_platform] %>
+                      <span class="inline-flex px-2 py-0.5 rounded text-xs font-medium" style="background-color: #F3F4F6; color: #374151;"><%= ls[:top_platform].capitalize %></span>
+                    <% else %>
+                      <span class="text-gray-400 text-xs">—</span>
+                    <% end %>
+                  </td>
+
+                  <%# Rating Breakdown (mini inline bars) %>
+                  <td class="px-4 py-4">
+                    <div class="flex items-center gap-0.5 justify-center" style="min-width: 120px;">
+                      <% dist = ls[:stats].rating_distribution %>
+                      <% total = dist.sum { |r| r[:count] } %>
+                      <% if total > 0 %>
+                        <% dist.reverse.each do |row| %>
+                          <% pct = row[:count].to_f / total * 100 %>
+                          <% bar_color = row[:star] >= 4 ? '#6366F1' : row[:star] == 3 ? '#FBBF24' : '#FB7185' %>
+                          <div class="h-6 rounded-sm" style="width: <%= [pct, 4].max %>%; background-color: <%= bar_color %>;" title="<%= row[:star] %>★: <%= row[:count] %>"></div>
+                        <% end %>
+                      <% else %>
+                        <span class="text-gray-400 text-xs">No data</span>
+                      <% end %>
+                    </div>
+                  </td>
                 </tr>
               <% end %>
             </tbody>
           </table>
+        </div>
+      </div>
+
+      <%# Charts %>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mt-5">
+        <%# Rating Trend %>
+        <div class="bg-white rounded-xl border border-gray-100 shadow-sm">
+          <div class="px-5 py-3 border-b border-gray-100">
+            <h3 class="text-sm font-semibold text-gray-900">Rating Trend</h3>
+            <p class="text-xs text-gray-400">Average rating over time by location</p>
+          </div>
+          <div class="p-4">
+            <% chart_data = @location_stats.map { |ls| { name: ls[:location].name, data: ls[:stats].rating_trend_data } } %>
+            <%= line_chart chart_data, height: "280px", colors: ["#6366F1", "#10B981", "#F59E0B", "#F43F5E", "#8B5CF6", "#EC4899"],
+                library: { scales: { y: { min: 1, max: 5 } } } %>
+          </div>
+        </div>
+
+        <%# Review Volume %>
+        <div class="bg-white rounded-xl border border-gray-100 shadow-sm">
+          <div class="px-5 py-3 border-b border-gray-100">
+            <h3 class="text-sm font-semibold text-gray-900">Review Volume</h3>
+            <p class="text-xs text-gray-400">Reviews received per location</p>
+          </div>
+          <div class="p-4">
+            <% volume_data = @location_stats.map { |ls| { name: ls[:location].name, data: ls[:stats].review_volume_data } } %>
+            <%= column_chart volume_data, height: "280px", colors: ["#6366F1", "#10B981", "#F59E0B", "#F43F5E", "#8B5CF6", "#EC4899"] %>
+          </div>
         </div>
       </div>
     <% end %>

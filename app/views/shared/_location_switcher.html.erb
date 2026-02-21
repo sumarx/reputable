@@ -1,10 +1,6 @@
 <% locations = Current.account.locations.order(:name) %>
 <% if locations.count > 1 %>
   <div class="flex items-center gap-1 bg-white rounded-xl border border-gray-100 shadow-sm p-1 w-fit">
-    <%= link_to "📊", locations_comparison_path,
-        title: "Compare Locations",
-        data: { turbo_frame: "_top" },
-        class: "px-2 py-1.5 text-xs rounded-lg hover:bg-gray-100 transition-all" %>
     <%= link_to "All Locations", url_for(request.query_parameters.merge(location_id: nil)),
         data: { turbo_frame: turbo_frame_id },
         class: "px-3 py-1.5 text-xs font-medium rounded-lg transition-all",
