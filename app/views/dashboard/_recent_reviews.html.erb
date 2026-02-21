@@ -1,0 +1,65 @@
+<%# Recent Reviews %>
+<div class="bg-white rounded-xl border border-gray-100 shadow-sm flex flex-col">
+  <div class="px-5 py-3 border-b border-gray-100 flex items-center justify-between">
+    <div>
+      <h3 class="text-sm font-semibold text-gray-900">Recent Reviews</h3>
+      <p class="text-xs text-gray-400"><%= @kpi[:total_reviews][:value] %> in this period</p>
+    </div>
+    <%= link_to "View all →", reviews_path, class: "text-xs font-medium hover:opacity-80", style: "color: #4F46E5;", data: { turbo_frame: "_top" } %>
+  </div>
+
+  <turbo-frame id="recent_reviews_frame">
+    <%# Tabs — inside the frame so they re-render %>
+    <div class="px-5 pt-3 border-b border-gray-100">
+      <div class="flex gap-6">
+        <% tab = params[:review_tab] || "all" %>
+        <% [["all", "All"], ["needs_reply", "Needs Reply"], ["negative", "Negative"]].each do |key, label| %>
+          <%= link_to label, dashboard_path(period: @period, review_tab: key),
+              data: { turbo_frame: "recent_reviews_frame" },
+              class: "pb-2.5 text-sm font-medium border-b-2 transition-colors -mb-px",
+              style: tab == key ? "border-color: #4F46E5; color: #4F46E5;" : "border-color: transparent; color: #9CA3AF;" %>
+        <% end %>
+      </div>
+    </div>
+
+    <% reviews_list = case params[:review_tab]
+       when "needs_reply" then @stats_service.recent_reviews_needing_reply(limit: 5)
+       when "negative" then @stats_service.recent_negative_reviews(limit: 5)
+       else @stats_service.recent_reviews(limit: 5)
+       end %>
+
+    <% if reviews_list.any? %>
+      <div class="divide-y divide-gray-50">
+        <% reviews_list.each do |review| %>
+          <%= link_to review_path(review), class: "block px-5 py-3 hover:bg-gray-50/50 transition-colors cursor-pointer", data: { turbo_frame: "_top" } do %>
+            <div class="flex items-start justify-between gap-3 mb-0.5">
+              <div class="flex items-center gap-2 min-w-0">
+                <span class="w-2 h-2 rounded-full shrink-0" style="background-color: <%= case review.sentiment
+                  when 'positive' then '#10B981'
+                  when 'neutral' then '#F59E0B'
+                  when 'negative' then '#F43F5E'
+                  else '#D1D5DB'
+                  end %>;"></span>
+                <span class="text-sm font-medium text-gray-900 truncate"><%= review.reviewer_name || "Anonymous" %></span>
+              </div>
+              <span class="text-xs text-amber-500 whitespace-nowrap shrink-0"><%= '★' * (review.rating || 0) %><%= '☆' * (5 - (review.rating || 0)) %></span>
+            </div>
+            <% if review.body.present? %>
+              <p class="text-xs text-gray-500 line-clamp-1 ml-4"><%= truncate(review.body, length: 80) %></p>
+            <% end %>
+            <div class="flex items-center gap-2 mt-1 ml-4">
+              <p class="text-[11px] text-gray-400"><%= review.platform&.capitalize %> · <%= time_ago_in_words(review.published_at || review.created_at) %> ago</p>
+              <% unless review.replied? %>
+                <span class="text-[10px] px-1.5 py-0.5 rounded font-medium" style="background-color: #FEF3C7; color: #92400E;">Unreplied</span>
+              <% end %>
+            </div>
+          <% end %>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="p-8 text-center">
+        <p class="text-sm text-gray-400">No reviews found</p>
+      </div>
+    <% end %>
+  </turbo-frame>
+</div>

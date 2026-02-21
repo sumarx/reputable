@@ -6,6 +6,11 @@ class CampaignsController < ApplicationController
     @campaigns = Current.account.campaigns.includes(:location, :campaign_responses)
   end
 
+  def analytics
+    @period = params[:period] || "30d"
+    @analytics = Campaigns::AnalyticsService.new(Current.account, period: @period)
+  end
+
   def show
     @responses = @campaign.campaign_responses.order(created_at: :desc).limit(20)
   end

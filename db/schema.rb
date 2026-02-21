@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_18_103519) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_21_093534) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -56,6 +56,20 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_18_103519) do
     t.index ["account_id"], name: "index_campaigns_on_account_id"
     t.index ["location_id"], name: "index_campaigns_on_location_id"
     t.index ["slug"], name: "index_campaigns_on_slug", unique: true
+  end
+
+  create_table "dashboard_summaries", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.text "action_item"
+    t.datetime "created_at", null: false
+    t.datetime "generated_at"
+    t.jsonb "improvements"
+    t.string "period"
+    t.jsonb "strengths"
+    t.text "summary"
+    t.datetime "updated_at", null: false
+    t.index ["account_id", "period"], name: "index_dashboard_summaries_on_account_id_and_period", unique: true
+    t.index ["account_id"], name: "index_dashboard_summaries_on_account_id"
   end
 
   create_table "invoices", force: :cascade do |t|
@@ -243,6 +257,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_18_103519) do
   add_foreign_key "campaign_responses", "campaigns"
   add_foreign_key "campaigns", "accounts"
   add_foreign_key "campaigns", "locations"
+  add_foreign_key "dashboard_summaries", "accounts"
   add_foreign_key "invoices", "accounts"
   add_foreign_key "invoices", "subscriptions"
   add_foreign_key "locations", "accounts"

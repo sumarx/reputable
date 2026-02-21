@@ -1,0 +1,93 @@
+<%# AI Insights Section %>
+<% ai_summary = Dashboard::AiSummaryService.new(@account, @stats_service).fetch %>
+
+<div class="bg-white rounded-xl border border-gray-100 shadow-sm">
+  <div class="px-5 py-3 border-b border-gray-100 flex items-center justify-between">
+    <h3 class="text-sm font-semibold text-gray-900">✨ AI Insights</h3>
+    <% if ai_summary %>
+      <span class="text-[10px] text-gray-400">Updated daily</span>
+    <% end %>
+  </div>
+
+  <% if ai_summary %>
+    <div class="grid grid-cols-1 xl:grid-cols-4 divide-y xl:divide-y-0 xl:divide-x divide-gray-100">
+      <%# Summary + Action %>
+      <div class="p-5 xl:col-span-2">
+        <p class="text-sm text-gray-700 leading-relaxed mb-4"><%= ai_summary[:summary] %></p>
+
+        <% if ai_summary[:action_item].present? %>
+          <div class="rounded-lg p-3" style="background-color: #EEF2FF;">
+            <div class="flex items-start gap-2.5">
+              <span class="text-sm">🎯</span>
+              <div>
+                <p class="text-xs font-semibold mb-0.5" style="color: #4338CA;">Recommended Action</p>
+                <p class="text-sm leading-relaxed" style="color: #4F46E5;"><%= ai_summary[:action_item] %></p>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+
+      <%# Strengths + Improvements %>
+      <div class="p-5 space-y-5">
+        <div>
+          <h4 class="text-xs font-semibold uppercase tracking-wider mb-2.5" style="color: #059669;">💪 Strengths</h4>
+          <ul class="space-y-2">
+            <% ai_summary[:strengths].each do |s| %>
+              <li class="flex items-start gap-2 text-sm text-gray-700">
+                <span class="w-1.5 h-1.5 rounded-full mt-2 shrink-0" style="background-color: #10B981;"></span>
+                <%= s %>
+              </li>
+            <% end %>
+          </ul>
+        </div>
+        <div>
+          <h4 class="text-xs font-semibold uppercase tracking-wider mb-2.5" style="color: #D97706;">📈 Improve</h4>
+          <ul class="space-y-2">
+            <% ai_summary[:improvements].each do |i| %>
+              <li class="flex items-start gap-2 text-sm text-gray-700">
+                <span class="w-1.5 h-1.5 rounded-full mt-2 shrink-0" style="background-color: #F59E0B;"></span>
+                <%= i %>
+              </li>
+            <% end %>
+          </ul>
+        </div>
+      </div>
+
+      <%# Keywords %>
+      <div class="p-5 space-y-5">
+        <% praise = @stats_service.top_keywords_positive(limit: 6) %>
+        <% if praise.any? %>
+          <div>
+            <h4 class="text-xs font-semibold uppercase tracking-wider mb-2.5" style="color: #059669;">👍 Praise</h4>
+            <div class="flex flex-wrap gap-2">
+              <% praise.each do |word, count| %>
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-sm font-medium" style="background-color: #ECFDF5; color: #065F46;">
+                  <%= word %> <span class="font-bold" style="color: #059669;"><%= count %></span>
+                </span>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+
+        <% complaints = @stats_service.top_keywords_negative(limit: 6) %>
+        <% if complaints.any? %>
+          <div>
+            <h4 class="text-xs font-semibold uppercase tracking-wider mb-2.5" style="color: #E11D48;">👎 Complaints</h4>
+            <div class="flex flex-wrap gap-2">
+              <% complaints.each do |word, count| %>
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-sm font-medium" style="background-color: #FFF1F2; color: #9F1239;">
+                  <%= word %> <span class="font-bold" style="color: #E11D48;"><%= count %></span>
+                </span>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  <% else %>
+    <div class="p-8 text-center">
+      <p class="text-sm text-gray-400">Need at least 3 reviews to generate AI insights</p>
+    </div>
+  <% end %>
+</div>

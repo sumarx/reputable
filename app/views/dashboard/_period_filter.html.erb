@@ -1,0 +1,8 @@
+<div class="flex items-center gap-1 bg-white rounded-xl border border-gray-100 shadow-sm p-1 w-fit">
+  <% [["7d", "7 days"], ["30d", "30 days"], ["90d", "90 days"], ["12mo", "12 months"], ["all", "All time"]].each do |key, label| %>
+    <%= link_to label, dashboard_path(period: key),
+        data: { turbo_frame: "dashboard_content" },
+        class: "px-3 py-1.5 text-xs font-medium rounded-lg transition-all #{@period == key ? 'text-white shadow-sm' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'}",
+        style: @period == key ? "background-color: #4F46E5;" : "" %>
+  <% end %>
+</div>

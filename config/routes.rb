@@ -37,6 +37,9 @@ Rails.application.routes.draw do
       get :qr_code
     end
     resources :campaign_responses, only: [:show], path: "responses"
+    collection do
+      get :analytics
+    end
   end
   
   # Public campaign feedback page

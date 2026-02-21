@@ -1,0 +1,76 @@
+<%# Response Management Widget %>
+<% unreplied = @stats_service.unreplied_count %>
+<% unreplied_neg = @stats_service.unreplied_negative_count %>
+<% avg_time = @stats_service.avg_response_time_hours %>
+<% reply_rate = @kpi[:response_rate][:value] %>
+<% platform_rates = @stats_service.response_rate_by_platform %>
+
+<div class="bg-white rounded-xl border border-gray-100 shadow-sm flex flex-col">
+  <div class="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+    <div>
+      <h3 class="text-sm font-semibold text-gray-900">Response Management</h3>
+      <p class="text-xs text-gray-400">Review reply performance</p>
+    </div>
+    <% if unreplied > 0 %>
+      <%= link_to reviews_path(filter: "unreplied"), data: { turbo_frame: "_top" }, class: "inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-lg transition-colors" , style: "background-color: #FFF1F2; color: #E11D48;" do %>
+        <span class="w-1.5 h-1.5 rounded-full animate-pulse" style="background-color: #F43F5E;"></span>
+        <%= unreplied %> need reply
+      <% end %>
+    <% end %>
+  </div>
+
+  <div class="p-4">
+    <%# Top stats row %>
+    <div class="grid grid-cols-3 gap-3 mb-4">
+      <div class="text-center p-3 rounded-lg" style="background-color: #F9FAFB;">
+        <p class="text-2xl font-bold text-gray-900"><%= unreplied %></p>
+        <p class="text-[11px] text-gray-500 mt-0.5">Unreplied</p>
+        <% if unreplied_neg > 0 %>
+          <p class="text-[10px] font-medium mt-1" style="color: #E11D48;"><%= unreplied_neg %> negative ⚠️</p>
+        <% end %>
+      </div>
+
+      <div class="text-center p-3 rounded-lg" style="background-color: #F9FAFB;">
+        <% if avg_time %>
+          <p class="text-2xl font-bold text-gray-900"><%= avg_time < 24 ? "#{avg_time}h" : "#{(avg_time / 24).round(1)}d" %></p>
+        <% else %>
+          <p class="text-lg font-medium text-gray-300 mt-1">No data</p>
+        <% end %>
+        <p class="text-[11px] text-gray-500 mt-0.5">Avg Response</p>
+      </div>
+
+      <div class="text-center p-3 rounded-lg" style="background-color: #F9FAFB;">
+        <p class="text-2xl font-bold text-gray-900"><%= reply_rate %>%</p>
+        <p class="text-[11px] text-gray-500 mt-0.5">Reply Rate</p>
+      </div>
+    </div>
+
+    <%# Platform breakdown %>
+    <% if platform_rates.any? %>
+      <div class="space-y-2.5">
+        <p class="text-[11px] text-gray-400 uppercase tracking-wider font-semibold">By Platform</p>
+        <% platform_rates.each do |pr| %>
+          <div class="flex items-center gap-2.5">
+            <span class="text-xs text-gray-600 w-20 capitalize"><%= pr[:platform] %></span>
+            <div class="flex-1 rounded-full h-2.5 overflow-hidden" style="background-color: #F3F4F6;">
+              <% if pr[:rate] > 0 %>
+                <div class="h-full rounded-full" style="width: <%= pr[:rate] %>%; background-color: #6366F1;"></div>
+              <% else %>
+                <div class="h-full rounded-full" style="width: 100%; background-color: #E5E7EB;"></div>
+              <% end %>
+            </div>
+            <span class="text-[11px] font-medium w-12 text-right" style="color: <%= pr[:rate] > 0 ? '#4F46E5' : '#9CA3AF' %>;">
+              <%= pr[:replied] %>/<%= pr[:total] %>
+            </span>
+          </div>
+        <% end %>
+      </div>
+
+      <% if reply_rate == 0 %>
+        <div class="mt-4 p-3 rounded-lg text-center" style="background-color: #FFFBEB;">
+          <p class="text-xs" style="color: #92400E;">💡 Replying to reviews boosts your visibility and builds trust. Start with negative ones!</p>
+        </div>
+      <% end %>
+    <% end %>
+  </div>
+</div>

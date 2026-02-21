@@ -32,10 +32,9 @@ class Campaigns::QrGenerator
   end
 
   def campaign_url
-    # In production, this should use the actual domain
-    host = Rails.env.production? ? ENV['APP_HOST'] : 'localhost:3000'
-    protocol = Rails.env.production? ? 'https' : 'http'
-    
+    host = ENV.fetch('APP_HOST', 'localhost:3000')
+    protocol = host.start_with?('localhost') ? 'http' : 'https'
+
     "#{protocol}://#{host}/c/#{@campaign.slug}"
   end
 end

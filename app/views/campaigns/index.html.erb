@@ -1,5 +1,7 @@
 <% content_for :page_title, "Campaigns" %>
 
+<%= render "campaigns/tabs" %>
+
 <div class="space-y-6">
   <div class="flex justify-end">
     <%= link_to new_campaign_path, class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 cursor-pointer" do %>
