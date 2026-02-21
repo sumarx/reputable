@@ -1,0 +1,188 @@
+<% content_for :page_title, "Location Comparison" %>
+
+<div class="space-y-5">
+  <turbo-frame id="locations_comparison_content">
+    <%# Header + Filter %>
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <div>
+        <h1 class="text-xl font-bold text-gray-900">Location Comparison</h1>
+        <p class="text-sm text-gray-500"><%= @locations.count %> locations side by side</p>
+      </div>
+      <div class="flex items-center gap-2">
+        <%= link_to "← Dashboard", dashboard_path, class: "text-xs font-medium text-gray-500 hover:text-gray-700", data: { turbo_frame: "_top" } %>
+        <div class="flex items-center gap-1 bg-white rounded-xl border border-gray-100 shadow-sm p-1 w-fit">
+          <% [["7d", "7 days"], ["30d", "30 days"], ["90d", "90 days"], ["all", "All time"]].each do |key, label| %>
+            <%= link_to label, locations_comparison_path(period: key),
+                data: { turbo_frame: "locations_comparison_content" },
+                class: "px-3 py-1.5 text-xs font-medium rounded-lg transition-all",
+                style: @period == key ? "background-color: #4F46E5; color: white;" : "color: #6B7280;" %>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <% if @locations.count < 2 %>
+      <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-12 text-center mt-5">
+        <p class="text-sm text-gray-400">Add at least 2 locations to compare performance</p>
+        <%= link_to "Add Location", new_location_path, class: "inline-flex items-center mt-3 px-4 py-2 text-sm font-medium rounded-lg text-white", style: "background-color: #4F46E5;", data: { turbo_frame: "_top" } %>
+      </div>
+    <% else %>
+
+      <%# Comparison Cards %>
+      <div class="grid grid-cols-1 md:grid-cols-<%= [@locations.count, 3].min %> gap-5 mt-5">
+        <% @location_stats.each do |ls| %>
+          <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+            <%# Location Header %>
+            <div class="px-5 py-4 border-b border-gray-100" style="background: linear-gradient(135deg, #EEF2FF, #F5F3FF);">
+              <h3 class="text-base font-bold text-gray-900"><%= ls[:location].name %></h3>
+              <p class="text-xs text-gray-500 mt-0.5">
+                <%= ls[:campaign_count] %> active campaign<%= ls[:campaign_count] == 1 ? '' : 's' %>
+                <% if ls[:top_platform] %> · Top: <%= ls[:top_platform].capitalize %><% end %>
+              </p>
+            </div>
+
+            <%# KPI Grid %>
+            <div class="grid grid-cols-2 divide-x divide-y divide-gray-100">
+              <div class="p-4 text-center">
+                <p class="text-2xl font-bold text-gray-900"><%= ls[:kpi][:total_reviews][:value] %></p>
+                <p class="text-xs text-gray-500 mt-0.5">Reviews</p>
+                <% trend = ls[:kpi][:total_reviews][:trend] %>
+                <% if trend && trend != 0 %>
+                  <p class="text-[11px] font-medium mt-1" style="color: <%= trend > 0 ? '#059669' : '#E11D48' %>;">
+                    <%= trend > 0 ? '↑' : '↓' %> <%= trend.abs %>%
+                  </p>
+                <% end %>
+              </div>
+
+              <div class="p-4 text-center">
+                <p class="text-2xl font-bold text-gray-900"><%= ls[:kpi][:average_rating][:value] %></p>
+                <p class="text-xs text-gray-500 mt-0.5">Avg Rating</p>
+                <% trend = ls[:kpi][:average_rating][:trend] %>
+                <% if trend && trend != 0 %>
+                  <p class="text-[11px] font-medium mt-1" style="color: <%= trend > 0 ? '#059669' : '#E11D48' %>;">
+                    <%= trend > 0 ? '↑' : '↓' %> <%= trend.abs %>%
+                  </p>
+                <% end %>
+              </div>
+
+              <div class="p-4 text-center">
+                <p class="text-2xl font-bold" style="color: <%= ls[:kpi][:sentiment_score][:value] > 50 ? '#059669' : ls[:kpi][:sentiment_score][:value] > 20 ? '#D97706' : '#E11D48' %>;">
+                  <%= ls[:kpi][:sentiment_score][:value] %>%
+                </p>
+                <p class="text-xs text-gray-500 mt-0.5">Sentiment</p>
+              </div>
+
+              <div class="p-4 text-center">
+                <p class="text-2xl font-bold" style="color: <%= ls[:unreplied] > 0 ? '#D97706' : '#059669' %>;">
+                  <%= ls[:unreplied] %>
+                </p>
+                <p class="text-xs text-gray-500 mt-0.5">Unreplied</p>
+              </div>
+            </div>
+
+            <%# Rating Distribution mini %>
+            <div class="px-5 py-3 border-t border-gray-100">
+              <p class="text-[11px] text-gray-400 uppercase tracking-wider font-semibold mb-2">Rating Breakdown</p>
+              <% dist = ls[:stats].rating_distribution %>
+              <div class="space-y-1.5">
+                <% dist.each do |row| %>
+                  <div class="flex items-center gap-2">
+                    <span class="text-[11px] text-gray-500 w-6 text-right"><%= row[:star] %>★</span>
+                    <div class="flex-1 rounded-full h-2 overflow-hidden" style="background-color: #F3F4F6;">
+                      <% bar_color = row[:star] >= 4 ? '#6366F1' : row[:star] == 3 ? '#FBBF24' : '#FB7185' %>
+                      <div class="h-full rounded-full" style="width: <%= [row[:percentage], 3].max %>%; background-color: <%= bar_color %>;"></div>
+                    </div>
+                    <span class="text-[11px] text-gray-400 w-8 text-right"><%= row[:count] %></span>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+
+            <%# Action %>
+            <div class="px-5 py-3 border-t border-gray-100">
+              <%= link_to "View Dashboard →", dashboard_path(location_id: ls[:location].id),
+                  class: "text-xs font-medium hover:opacity-80", style: "color: #4F46E5;", data: { turbo_frame: "_top" } %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+
+      <%# Comparison Chart — Rating Trend %>
+      <div class="bg-white rounded-xl border border-gray-100 shadow-sm mt-5">
+        <div class="px-5 py-3 border-b border-gray-100">
+          <h3 class="text-sm font-semibold text-gray-900">Rating Trend Comparison</h3>
+          <p class="text-xs text-gray-400">Average rating over time by location</p>
+        </div>
+        <div class="p-4">
+          <% chart_data = @location_stats.map { |ls| { name: ls[:location].name, data: ls[:stats].rating_trend_data } } %>
+          <%= line_chart chart_data, height: "280px", colors: ["#6366F1", "#10B981", "#F59E0B", "#F43F5E"],
+              library: { scales: { y: { min: 1, max: 5 } } } %>
+        </div>
+      </div>
+
+      <%# Review Volume Comparison %>
+      <div class="bg-white rounded-xl border border-gray-100 shadow-sm mt-5">
+        <div class="px-5 py-3 border-b border-gray-100">
+          <h3 class="text-sm font-semibold text-gray-900">Review Volume Comparison</h3>
+          <p class="text-xs text-gray-400">Number of reviews per location over time</p>
+        </div>
+        <div class="p-4">
+          <% volume_data = @location_stats.map { |ls| { name: ls[:location].name, data: ls[:stats].review_volume_data } } %>
+          <%= column_chart volume_data, height: "280px", colors: ["#6366F1", "#10B981", "#F59E0B", "#F43F5E"], stacked: true %>
+        </div>
+      </div>
+
+      <%# Summary Table %>
+      <div class="bg-white rounded-xl border border-gray-100 shadow-sm mt-5">
+        <div class="px-5 py-3 border-b border-gray-100">
+          <h3 class="text-sm font-semibold text-gray-900">At a Glance</h3>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="border-b border-gray-100" style="background-color: #F9FAFB;">
+                <th class="text-left px-5 py-3 text-xs text-gray-500 font-semibold uppercase tracking-wider">Location</th>
+                <th class="text-center px-4 py-3 text-xs text-gray-500 font-semibold uppercase tracking-wider">Reviews</th>
+                <th class="text-center px-4 py-3 text-xs text-gray-500 font-semibold uppercase tracking-wider">Rating</th>
+                <th class="text-center px-4 py-3 text-xs text-gray-500 font-semibold uppercase tracking-wider">Sentiment</th>
+                <th class="text-center px-4 py-3 text-xs text-gray-500 font-semibold uppercase tracking-wider">Response</th>
+                <th class="text-center px-4 py-3 text-xs text-gray-500 font-semibold uppercase tracking-wider">Unreplied</th>
+                <th class="text-center px-4 py-3 text-xs text-gray-500 font-semibold uppercase tracking-wider">Campaigns</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-50">
+              <% @location_stats.each do |ls| %>
+                <tr class="hover:bg-gray-50/50">
+                  <td class="px-5 py-3">
+                    <%= link_to ls[:location].name, dashboard_path(location_id: ls[:location].id),
+                        class: "font-medium text-gray-900 hover:text-indigo-600", data: { turbo_frame: "_top" } %>
+                  </td>
+                  <td class="text-center px-4 py-3 font-semibold text-gray-900"><%= ls[:kpi][:total_reviews][:value] %></td>
+                  <td class="text-center px-4 py-3">
+                    <span class="text-amber-500"><%= '★' * ls[:kpi][:average_rating][:value].round %><%= '☆' * (5 - ls[:kpi][:average_rating][:value].round) %></span>
+                    <span class="text-gray-500 ml-1"><%= ls[:kpi][:average_rating][:value] %></span>
+                  </td>
+                  <td class="text-center px-4 py-3">
+                    <span class="inline-flex px-2.5 py-1 rounded-full text-xs font-semibold"
+                          style="background-color: <%= ls[:kpi][:sentiment_score][:value] > 50 ? '#ECFDF5' : ls[:kpi][:sentiment_score][:value] > 20 ? '#FFFBEB' : '#FFF1F2' %>; color: <%= ls[:kpi][:sentiment_score][:value] > 50 ? '#059669' : ls[:kpi][:sentiment_score][:value] > 20 ? '#92400E' : '#E11D48' %>;">
+                      <%= ls[:kpi][:sentiment_score][:value] %>%
+                    </span>
+                  </td>
+                  <td class="text-center px-4 py-3 font-medium text-gray-900"><%= ls[:kpi][:response_rate][:value] %>%</td>
+                  <td class="text-center px-4 py-3">
+                    <% if ls[:unreplied] > 0 %>
+                      <span class="inline-flex px-2 py-0.5 rounded-full text-xs font-semibold" style="background-color: #FEF3C7; color: #92400E;"><%= ls[:unreplied] %></span>
+                    <% else %>
+                      <span class="text-gray-400">0</span>
+                    <% end %>
+                  </td>
+                  <td class="text-center px-4 py-3 text-gray-500"><%= ls[:campaign_count] %></td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    <% end %>
+  </turbo-frame>
+</div>

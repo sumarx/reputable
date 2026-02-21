@@ -2,6 +2,24 @@ class DashboardController < ApplicationController
   before_action :resume_session
   include LocationFilterable
 
+  def locations
+    @account = Current.account
+    @period = params[:period] || "30d"
+    @locations = @account.locations.includes(:reviews, :campaigns).order(:name)
+    @location_stats = @locations.map do |loc|
+      stats = Dashboard::StatsService.new(@account, period: @period, location: loc)
+      kpi = stats.kpi_stats
+      {
+        location: loc,
+        stats: stats,
+        kpi: kpi,
+        unreplied: stats.unreplied_count,
+        top_platform: stats.platform_distribution.max_by { |_, v| v }&.first,
+        campaign_count: loc.campaigns.active.count
+      }
+    end
+  end
+
   def show
     @account = Current.account
     @period = params[:period] || "30d"

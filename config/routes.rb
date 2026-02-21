@@ -4,6 +4,7 @@ Rails.application.routes.draw do
   resources :passwords, param: :token
   
   get "dashboard", to: "dashboard#show"
+  get "dashboard/locations", to: "dashboard#locations", as: :locations_comparison
   
   resources :reviews, only: [:index, :show] do
     member do
