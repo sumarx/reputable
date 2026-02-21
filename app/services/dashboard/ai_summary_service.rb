@@ -2,22 +2,29 @@ module Dashboard
   class AiSummaryService
     GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent".freeze
 
-    def initialize(account, stats_service)
+    def initialize(account, stats_service, location: nil)
       @account = account
       @stats = stats_service
+      @location = location
+    end
+
+    def cache_key_period
+      key = @stats.period_key
+      key += ":loc:#{@location.id}" if @location
+      key
     end
 
     # Read from DB; generate in background if stale
     def fetch
-      record = DashboardSummary.find_by(account: @account, period: @stats.period_key)
+      record = DashboardSummary.find_by(account: @account, period: cache_key_period)
 
       if record.nil? || record.stale?
         # Generate synchronously on first load, async after that
         if record.nil?
           generate_and_store!
-          record = DashboardSummary.find_by(account: @account, period: @stats.period_key)
+          record = DashboardSummary.find_by(account: @account, period: cache_key_period)
         else
-          GenerateDashboardSummaryJob.perform_later(@account.id, @stats.period_key)
+          GenerateDashboardSummaryJob.perform_later(@account.id, cache_key_period)
         end
       end
 
@@ -29,7 +36,7 @@ module Dashboard
       data = call_gemini
       return unless data
 
-      record = DashboardSummary.find_or_initialize_by(account: @account, period: @stats.period_key)
+      record = DashboardSummary.find_or_initialize_by(account: @account, period: cache_key_period)
       record.update!(
         summary: data[:summary],
         strengths: data[:strengths],
@@ -49,8 +56,10 @@ module Dashboard
 
       review_texts = reviews.map { |r| "#{r.rating}★: #{r.body.truncate(200)}" }.join("\n")
 
+      location_context = @location ? " for #{@location.name}" : ""
+
       prompt = <<~PROMPT
-        You are a restaurant reputation analyst. Analyze these recent customer reviews and provide a brief, actionable summary for the restaurant owner.
+        You are a restaurant reputation analyst. Analyze these recent customer reviews#{location_context} and provide a brief, actionable summary for the restaurant owner.
 
         Reviews:
         #{review_texts}

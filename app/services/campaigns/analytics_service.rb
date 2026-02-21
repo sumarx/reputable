@@ -7,21 +7,27 @@ module Campaigns
       "all" => nil
     }.freeze
 
-    attr_reader :account, :period_key
+    attr_reader :account, :period_key, :location
 
-    def initialize(account, period: "30d")
+    def initialize(account, period: "30d", location: nil)
       @account = account
       @period_key = PERIODS.key?(period) ? period : "30d"
       @period_duration = PERIODS[@period_key]
+      @location = location
     end
 
     def campaigns
-      @campaigns ||= account.campaigns.includes(:location)
+      @campaigns ||= begin
+        scope = account.campaigns.includes(:location)
+        scope = scope.where(location: location) if location
+        scope
+      end
     end
 
     def responses
       @responses ||= begin
         scope = CampaignResponse.joins(:campaign).where(campaigns: { account_id: account.id })
+        scope = scope.where(campaigns: { location_id: location.id }) if location
         scope = scope.where("campaign_responses.created_at >= ?", period_start) if period_start
         scope
       end

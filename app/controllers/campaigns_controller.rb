@@ -1,5 +1,6 @@
 class CampaignsController < ApplicationController
   before_action :resume_session
+  include LocationFilterable
   before_action :set_campaign, only: [:show, :edit, :update, :destroy, :qr_code]
 
   def index
@@ -8,7 +9,7 @@ class CampaignsController < ApplicationController
 
   def analytics
     @period = params[:period] || "30d"
-    @analytics = Campaigns::AnalyticsService.new(Current.account, period: @period)
+    @analytics = Campaigns::AnalyticsService.new(Current.account, period: @period, location: @current_location)
   end
 
   def show

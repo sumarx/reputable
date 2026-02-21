@@ -8,17 +8,18 @@ module Dashboard
       "all" => nil
     }.freeze
 
-    attr_reader :account, :period_key, :period_duration
+    attr_reader :account, :period_key, :period_duration, :location
 
-    def initialize(account, period: "30d")
+    def initialize(account, period: "30d", location: nil)
       @account = account
       @period_key = PERIODS.key?(period) ? period : "30d"
       @period_duration = PERIODS[@period_key]
+      @location = location
     end
 
     def reviews
       @reviews ||= begin
-        scope = account.reviews
+        scope = location ? location.reviews : account.reviews
         scope = scope.where("published_at >= ?", period_start) if period_duration
         scope
       end
@@ -118,11 +119,14 @@ module Dashboard
 
     def top_categories(limit: 10)
       # categories is a jsonb array column
+      conditions = ["account_id = #{account.id}"]
+      conditions << "location_id = #{location.id}" if location
+      conditions << "published_at >= '#{period_start.iso8601}'" if period_start
+
       result = account.connection.execute(<<-SQL)
         SELECT cat, COUNT(*) as cnt
         FROM reviews, jsonb_array_elements_text(categories) AS cat
-        WHERE account_id = #{account.id}
-        #{"AND published_at >= '#{period_start.iso8601}'" if period_start}
+        WHERE #{conditions.join(' AND ')}
         GROUP BY cat
         ORDER BY cnt DESC
         LIMIT #{limit}

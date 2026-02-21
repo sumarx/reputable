@@ -1,5 +1,5 @@
 <%# AI Insights Section %>
-<% ai_summary = Dashboard::AiSummaryService.new(@account, @stats_service).fetch %>
+<% ai_summary = Dashboard::AiSummaryService.new(@account, @stats_service, location: @current_location).fetch %>
 
 <div class="bg-white rounded-xl border border-gray-100 shadow-sm">
   <div class="px-5 py-3 border-b border-gray-100 flex items-center justify-between">
