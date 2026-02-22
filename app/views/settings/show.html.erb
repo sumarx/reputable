@@ -23,6 +23,48 @@
     <% end %>
   </div>
 
+  <!-- Brand Voice -->
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+    <div class="mb-6">
+      <h3 class="text-lg font-medium text-gray-900">Brand Voice</h3>
+      <p class="text-sm text-gray-500 mt-1">Customize how AI generates review replies. The more detail you provide, the more your replies will sound like <em>you</em>.</p>
+    </div>
+    <%= form_with url: settings_path, method: :patch, class: "space-y-5" do |f| %>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Restaurant Description</label>
+        <textarea name="account[brand_description]" rows="3" placeholder="e.g. We're a family-friendly Pakistani cafe in Sheikhupura known for our desi fusion menu and fresh chai. Our vibe is warm and casual." class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"><%= @account.brand_description %></textarea>
+        <p class="mt-1 text-xs text-gray-400">Help the AI understand your restaurant's identity and vibe.</p>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Reply Style Guidelines</label>
+        <textarea name="account[brand_reply_guidelines]" rows="3" placeholder="e.g. Keep it warm and personal. Use the customer's name. Mention our tagline 'Where Every Bite Tells a Story'. Keep replies under 80 words." class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"><%= @account.brand_reply_guidelines %></textarea>
+        <p class="mt-1 text-xs text-gray-400">How should replies sound? Formal, casual, witty? Any specific phrases or style?</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Always Mention</label>
+          <textarea name="account[brand_always_mention]" rows="3" placeholder="e.g. Our new seasonal menu&#10;Free parking available&#10;Our loyalty program" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"><%= @account.brand_always_mention %></textarea>
+          <p class="mt-1 text-xs text-gray-400">Things to weave into replies naturally (one per line).</p>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Never Say</label>
+          <textarea name="account[brand_never_say]" rows="3" placeholder="e.g. Sorry for the inconvenience&#10;As per our policy&#10;Unfortunately" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"><%= @account.brand_never_say %></textarea>
+          <p class="mt-1 text-xs text-gray-400">Words or phrases the AI should avoid (one per line).</p>
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Sample Replies You Love</label>
+        <textarea name="account[brand_sample_replies]" rows="4" placeholder="Paste 2-3 replies you've written before that capture your voice perfectly. The AI will learn your style from these examples." class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"><%= @account.brand_sample_replies %></textarea>
+        <p class="mt-1 text-xs text-gray-400">The best way to teach AI your voice. Paste real replies you're proud of.</p>
+      </div>
+
+      <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 cursor-pointer">Save Brand Voice</button>
+    <% end %>
+  </div>
+
   <!-- Profile Settings -->
   <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
     <h3 class="text-lg font-medium text-gray-900 mb-6">Profile</h3>

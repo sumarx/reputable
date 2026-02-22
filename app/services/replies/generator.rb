@@ -37,10 +37,13 @@ class Replies::Generator
     location_name = @review.location.name
     rating_context = @review.rating ? "#{@review.rating}-star" : ""
     sentiment_context = @review.sentiment || "neutral"
+    account = @review.account
+
+    brand_context = build_brand_context(account)
 
     <<~PROMPT
       You are writing a #{@tone} reply to a #{rating_context} #{sentiment_context} restaurant review for #{location_name}.
-      
+      #{brand_context}
       Review: "#{@review.body}"
       Customer: #{@review.reviewer_name || 'A valued customer'}
       
@@ -54,6 +57,34 @@ class Replies::Generator
       Respond with ONLY valid JSON, no markdown, no explanation:
       {"replies": ["First reply...", "Second reply...", "Third reply..."]}
     PROMPT
+  end
+
+  def build_brand_context(account)
+    parts = []
+
+    if account.brand_description.present?
+      parts << "Restaurant description: #{account.brand_description}"
+    end
+
+    if account.brand_reply_guidelines.present?
+      parts << "Reply style guidelines: #{account.brand_reply_guidelines}"
+    end
+
+    if account.brand_always_mention.present?
+      parts << "Always try to naturally mention: #{account.brand_always_mention}"
+    end
+
+    if account.brand_never_say.present?
+      parts << "NEVER use these words/phrases: #{account.brand_never_say}"
+    end
+
+    if account.brand_sample_replies.present?
+      parts << "Here are example replies that capture the desired voice — match this style:\n#{account.brand_sample_replies}"
+    end
+
+    return "" if parts.empty?
+
+    "\nBRAND VOICE INSTRUCTIONS (follow these closely):\n#{parts.join("\n")}\n"
   end
 
   def parse_response(response)

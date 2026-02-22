@@ -26,7 +26,7 @@ class SettingsController < ApplicationController
   private
 
   def account_params
-    params.require(:account).permit(:name, :notify_slack, :slack_webhook_url)
+    params.require(:account).permit(:name, :notify_slack, :slack_webhook_url, :brand_description, :brand_reply_guidelines, :brand_always_mention, :brand_never_say, :brand_sample_replies)
   end
 
   def user_params
