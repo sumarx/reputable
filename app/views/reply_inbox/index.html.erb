@@ -150,9 +150,19 @@
       </div>
 
       <!-- Pagination -->
-      <div class="mt-6">
-        <%== pagy_nav(@pagy) if @pagy.pages > 1 %>
-      </div>
+      <% if @pagy.last > 1 %>
+        <div class="mt-6 flex items-center justify-between">
+          <span class="text-sm text-gray-500">Showing <%= @pagy.from %>–<%= @pagy.to %> of <%= @pagy.count %></span>
+          <div class="flex items-center gap-2">
+            <% if @pagy.page > 1 %>
+              <%= link_to "← Previous", reply_inbox_path(page: @pagy.page - 1, tab: @tab), class: "px-3 py-1.5 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-md hover:bg-gray-50" %>
+            <% end %>
+            <% if @pagy.page < @pagy.last %>
+              <%= link_to "Next →", reply_inbox_path(page: @pagy.page + 1, tab: @tab), class: "px-3 py-1.5 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-md hover:bg-gray-50" %>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
     <% end %>
   <% end %>
 </div>
