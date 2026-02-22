@@ -1,27 +1,25 @@
 <% content_for(:title) { "Reply Inbox — RepuTable" } %>
 
-<div class="max-w-5xl mx-auto">
+<div class="max-w-3xl mx-auto">
   <!-- Header -->
-  <div class="flex items-center justify-between mb-6">
-    <div>
-      <h1 class="text-2xl font-bold text-gray-900">Reply Inbox</h1>
-      <p class="text-sm text-gray-500 mt-1">
-        <span class="font-semibold" style="color: #4f46e5;"><%= @pending_count %></span> reviews awaiting reply
-      </p>
-    </div>
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold text-gray-900">Reply Inbox</h1>
+    <p class="text-sm text-gray-500 mt-1">
+      <span class="font-semibold" style="color: #4f46e5;"><%= @pending_count %></span> reviews awaiting reply
+    </p>
   </div>
 
   <!-- Filter Tabs -->
   <%= turbo_frame_tag "inbox_content" do %>
-    <div class="flex space-x-1 mb-6 bg-gray-100 rounded-lg p-1 w-fit">
+    <div class="flex space-x-1 mb-6 bg-gray-100 rounded-lg p-1 overflow-x-auto">
       <% [
-        ["needs_reply", "Needs Reply"],
-        ["drafted", "Drafted"],
-        ["sent", "Sent"],
+        ["needs_reply", "⏳ Needs Reply"],
+        ["drafted", "✏️ Drafted"],
+        ["sent", "✅ Sent"],
         ["all", "All"]
       ].each do |key, label| %>
         <%= link_to reply_inbox_path(tab: key),
-              class: "px-4 py-2 text-sm font-medium rounded-md transition-colors #{@tab == key ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'}",
+              class: "px-3 py-2 text-sm font-medium rounded-md whitespace-nowrap transition-colors #{@tab == key ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-900'}",
               data: { turbo_frame: "inbox_content" } do %>
           <%= label %>
         <% end %>
@@ -31,7 +29,7 @@
     <!-- Review Cards -->
     <% if @reviews.empty? %>
       <div class="text-center py-16 bg-white rounded-xl border border-gray-200">
-        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg class="mx-auto h-12 w-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
         </svg>
         <h3 class="mt-3 text-sm font-semibold text-gray-900">All caught up!</h3>
@@ -40,108 +38,96 @@
     <% else %>
       <div class="space-y-4">
         <% @reviews.each do |review| %>
-          <div class="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
-            <!-- Review Header -->
-            <div class="p-5">
-              <div class="flex items-start justify-between">
-                <div class="flex-1 min-w-0">
-                  <div class="flex items-center gap-3 mb-2">
-                    <!-- Sentiment badge -->
-                    <% badge_color = case review.sentiment
-                      when "positive" then "background-color: #dcfce7; color: #166534;"
-                      when "negative" then "background-color: #fee2e2; color: #991b1b;"
-                      else "background-color: #f3f4f6; color: #374151;"
-                    end %>
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium" style="<%= badge_color %>">
-                      <%= review.sentiment&.capitalize || "Unknown" %>
-                    </span>
-                    <!-- Rating -->
-                    <% if review.rating %>
-                      <span class="text-sm" style="color: #d97706;"><%= review.star_rating %></span>
-                    <% end %>
-                    <!-- Location -->
-                    <span class="text-xs text-gray-500">📍 <%= review.location.name %></span>
-                  </div>
-
-                  <div class="flex items-center gap-2 mb-2">
-                    <span class="text-sm font-semibold text-gray-900"><%= review.reviewer_name || "Anonymous" %></span>
-                    <span class="text-xs text-gray-400"><%= time_ago_in_words(review.published_at || review.created_at) %> ago</span>
-                  </div>
-
-                  <p class="text-sm text-gray-700 line-clamp-3"><%= review.body || "No review text" %></p>
-                </div>
-
-                <!-- Status badge -->
-                <div class="ml-4 flex-shrink-0">
-                  <% status_style = case review.reply_status
-                    when "sent" then "background-color: #dcfce7; color: #166534;"
-                    when "manual" then "background-color: #dbeafe; color: #1e40af;"
-                    when "draft" then "background-color: #fef3c7; color: #92400e;"
-                    else "background-color: #f3f4f6; color: #6b7280;"
-                  end %>
-                  <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium" style="<%= status_style %>">
-                    <%= review.reply_status.capitalize %>
+          <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+            <!-- Review Card -->
+            <div class="p-4">
+              <!-- Top row: sentiment + rating + location + status -->
+              <div class="flex items-center justify-between mb-2">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <% badge_styles = {
+                    "positive" => "background-color: #dcfce7; color: #166534;",
+                    "negative" => "background-color: #fee2e2; color: #991b1b;",
+                  } %>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium"
+                        style="<%= badge_styles[review.sentiment] || 'background-color: #f3f4f6; color: #374151;' %>">
+                    <%= review.sentiment&.capitalize || "—" %>
                   </span>
+                  <% if review.rating %>
+                    <span class="text-xs" style="color: #d97706;"><%= "★" * review.rating %><%= "☆" * (5 - review.rating) %></span>
+                  <% end %>
+                  <span class="text-xs text-gray-400">📍 <%= review.location.name %></span>
                 </div>
+                <% status_styles = {
+                  "sent" => "background-color: #dcfce7; color: #166534;",
+                  "manual" => "background-color: #dbeafe; color: #1e40af;",
+                  "draft" => "background-color: #fef3c7; color: #92400e;",
+                } %>
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium"
+                      style="<%= status_styles[review.reply_status] || 'background-color: #f3f4f6; color: #6b7280;' %>">
+                  <%= review.reply_status.capitalize %>
+                </span>
               </div>
+
+              <!-- Reviewer + time -->
+              <div class="flex items-center gap-2 mb-1.5">
+                <span class="text-sm font-semibold text-gray-900"><%= review.reviewer_name || "Anonymous" %></span>
+                <span class="text-xs text-gray-400"><%= time_ago_in_words(review.published_at || review.created_at) %> ago</span>
+              </div>
+
+              <!-- Review text -->
+              <p class="text-sm text-gray-600 leading-relaxed"><%= truncate(review.body || "No review text", length: 200) %></p>
             </div>
 
-            <!-- Reply Drafts Section -->
-            <% drafts = review.reply_drafts.order(:created_at) %>
+            <!-- Reply Drafts -->
+            <% drafts = review.reply_drafts.where(status: %w[draft approved]).order(:created_at) %>
             <% if drafts.any? %>
-              <div class="border-t border-gray-100 bg-gray-50 p-5">
-                <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
-                  AI-Generated Replies (<%= drafts.count %>)
-                </h4>
+              <div class="border-t border-gray-100 bg-gray-50 px-4 py-3">
+                <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
+                  AI Replies (<%= drafts.count %>)
+                </p>
                 <div class="space-y-3">
                   <% drafts.each do |draft| %>
-                    <div class="bg-white rounded-lg border border-gray-200 p-4">
-                      <div class="flex items-start justify-between gap-3">
-                        <p class="text-sm text-gray-700 flex-1"><%= draft.body %></p>
-                        <div class="flex-shrink-0 flex items-center gap-2">
-                          <% if draft.draft? %>
-                            <%= button_to approve_reply_draft_path(draft), method: :post,
-                                  class: "inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-md text-white hover:opacity-90 transition-opacity",
-                                  style: "background-color: #059669;" do %>
-                              ✓ Approve
-                            <% end %>
-                            <%= button_to reply_draft_path(draft), method: :patch,
-                                  params: { reply_draft: { status: "rejected" } },
-                                  class: "inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-md text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors" do %>
-                              ✗
-                            <% end %>
-                          <% elsif draft.approved? %>
-                            <span class="text-xs font-medium px-2 py-1 rounded" style="background-color: #dcfce7; color: #166534;">Approved</span>
-                            <%= button_to send_reply_reply_draft_path(draft), method: :post,
-                                  class: "inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-md text-white hover:opacity-90 transition-opacity",
-                                  style: "background-color: #4f46e5;" do %>
-                              Send Reply
-                            <% end %>
-                            <button onclick="navigator.clipboard.writeText(this.dataset.text).then(() => { this.textContent = 'Copied!'; setTimeout(() => this.textContent = '📋 Copy', 1500); })"
-                                    data-text="<%= draft.body %>"
-                                    class="inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-md text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors">
-                              📋 Copy
-                            </button>
-                          <% else %>
-                            <span class="text-xs text-gray-400">Rejected</span>
+                    <div class="bg-white rounded-lg border border-gray-200 p-3">
+                      <!-- Reply text (truncated for scanning) -->
+                      <p class="text-sm text-gray-700 leading-relaxed mb-3"><%= truncate(draft.body, length: 250) %></p>
+
+                      <!-- Action buttons -->
+                      <div class="flex items-center gap-2 flex-wrap">
+                        <% if draft.draft? %>
+                          <%= button_to approve_reply_draft_path(draft, redirect_to: reply_inbox_path(tab: @tab)), method: :post,
+                                class: "inline-flex items-center px-3 py-1.5 text-xs font-semibold rounded-lg text-white transition-opacity hover:opacity-90",
+                                style: "background-color: #059669;" do %>
+                            ✓ Approve
                           <% end %>
-                        </div>
-                      </div>
-                      <div class="mt-2 flex items-center gap-2">
-                        <span class="text-xs text-gray-400">Tone: <%= draft.tone.capitalize %></span>
-                        <span class="text-xs text-gray-400">•</span>
-                        <span class="text-xs text-gray-400"><%= draft.status.capitalize %></span>
+                          <%= button_to reply_draft_path(draft, redirect_to: reply_inbox_path(tab: @tab)),
+                                method: :patch,
+                                params: { reply_draft: { status: "rejected" } },
+                                class: "inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-lg text-gray-500 bg-gray-100 hover:bg-gray-200 transition-colors" do %>
+                            Dismiss
+                          <% end %>
+                        <% elsif draft.approved? %>
+                          <span class="text-xs font-medium px-2 py-1 rounded-lg" style="background-color: #dcfce7; color: #166534;">✓ Approved</span>
+                          <%= button_to send_reply_reply_draft_path(draft), method: :post,
+                                class: "inline-flex items-center px-3 py-1.5 text-xs font-semibold rounded-lg text-white transition-opacity hover:opacity-90",
+                                style: "background-color: #4f46e5;" do %>
+                            Send Reply
+                          <% end %>
+                          <button onclick="navigator.clipboard.writeText(this.dataset.text).then(() => { let s=this.querySelector('span'); s.textContent='Copied!'; setTimeout(() => s.textContent='📋 Copy', 1500); })"
+                                  data-text="<%= draft.body %>"
+                                  class="inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-lg text-gray-500 bg-gray-100 hover:bg-gray-200 transition-colors cursor-pointer">
+                            <span>📋 Copy</span>
+                          </button>
+                        <% end %>
                       </div>
                     </div>
                   <% end %>
                 </div>
               </div>
             <% elsif review.body.present? && !review.replied? %>
-              <div class="border-t border-gray-100 bg-gray-50 p-5 text-center">
+              <div class="border-t border-gray-100 bg-gray-50 px-4 py-4 text-center">
                 <%= button_to generate_reply_review_path(review, redirect_to: reply_inbox_path(tab: "drafted")), method: :post,
-                      class: "inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg text-white hover:opacity-90 transition-opacity",
-                      style: "background-color: #4f46e5;",
-                      onclick: "this.disabled=true; this.innerHTML='⏳ Generating...'; this.style.opacity='0.6';" do %>
+                      class: "inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg text-white transition-opacity hover:opacity-90",
+                      style: "background-color: #4f46e5;" do %>
                   🤖 Generate AI Replies
                 <% end %>
               </div>
@@ -153,10 +139,10 @@
       <!-- Pagination -->
       <% if @pagy.last > 1 %>
         <div class="mt-6 flex items-center justify-between">
-          <span class="text-sm text-gray-500">Showing <%= @pagy.from %>–<%= @pagy.to %> of <%= @pagy.count %></span>
+          <span class="text-sm text-gray-500">Page <%= @pagy.page %> of <%= @pagy.last %></span>
           <div class="flex items-center gap-2">
             <% if @pagy.page > 1 %>
-              <%= link_to "← Previous", reply_inbox_path(page: @pagy.page - 1, tab: @tab), class: "px-3 py-1.5 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-md hover:bg-gray-50" %>
+              <%= link_to "← Prev", reply_inbox_path(page: @pagy.page - 1, tab: @tab), class: "px-3 py-1.5 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-md hover:bg-gray-50" %>
             <% end %>
             <% if @pagy.page < @pagy.last %>
               <%= link_to "Next →", reply_inbox_path(page: @pagy.page + 1, tab: @tab), class: "px-3 py-1.5 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-md hover:bg-gray-50" %>

@@ -3,16 +3,18 @@ class ReplyDraftsController < ApplicationController
   before_action :set_reply_draft
 
   def update
+    redirect_url = params[:redirect_to].presence || review_path(@reply_draft.review)
     if @reply_draft.update(reply_draft_params)
-      redirect_to @reply_draft.review, notice: "Reply draft updated."
+      redirect_to redirect_url, notice: "Reply draft updated."
     else
-      redirect_to @reply_draft.review, alert: "Could not update reply draft."
+      redirect_to redirect_url, alert: "Could not update reply draft."
     end
   end
 
   def approve
     @reply_draft.update!(status: "approved")
-    redirect_to @reply_draft.review, notice: "Reply draft approved."
+    redirect_url = params[:redirect_to].presence || review_path(@reply_draft.review)
+    redirect_to redirect_url, notice: "Reply approved! You can now send it."
   end
 
   def send_reply
@@ -45,6 +47,6 @@ class ReplyDraftsController < ApplicationController
   end
 
   def reply_draft_params
-    params.require(:reply_draft).permit(:body, :tone)
+    params.require(:reply_draft).permit(:body, :tone, :status)
   end
 end

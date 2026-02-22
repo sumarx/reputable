@@ -21,6 +21,12 @@ class ReviewsController < ApplicationController
   end
 
   def generate_reply
+    if @review.reply_drafts.draft.any?
+      redirect_url = params[:redirect_to].presence || review_path(@review)
+      redirect_to redirect_url, notice: "Reply drafts already exist for this review."
+      return
+    end
+
     tone = params[:tone] || "professional"
     GenerateReplyJob.perform_later(@review, tone)
 
@@ -28,7 +34,7 @@ class ReviewsController < ApplicationController
 
     respond_to do |format|
       format.turbo_stream
-      format.html { redirect_to redirect_url, notice: "AI reply drafts are being generated..." }
+      format.html { redirect_to redirect_url, notice: "Generating AI replies — they'll appear in a few seconds..." }
     end
   end
 
