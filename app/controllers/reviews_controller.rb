@@ -22,13 +22,13 @@ class ReviewsController < ApplicationController
 
   def generate_reply
     tone = params[:tone] || "professional"
-    GenerateReplyJob.perform_now(@review, tone)
+    GenerateReplyJob.perform_later(@review, tone)
 
     redirect_url = params[:redirect_to].presence || review_path(@review)
 
     respond_to do |format|
       format.turbo_stream
-      format.html { redirect_to redirect_url, notice: "AI reply drafts generated!" }
+      format.html { redirect_to redirect_url, notice: "AI reply drafts are being generated..." }
     end
   end
 
