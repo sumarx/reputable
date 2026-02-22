@@ -21,12 +21,6 @@ class Invoice < ApplicationRecord
     "#{currency} #{number_with_comma(amount_cents / 100)}"
   end
 
-  private
-
-  def number_with_comma(number)
-    number.to_s.reverse.gsub(/(\d{3})(?=\d)/, '\\1,').reverse
-  end
-
   def overdue?
     status == 'overdue' || (status == 'pending' && due_at < Date.current)
   end
@@ -41,7 +35,6 @@ class Invoice < ApplicationRecord
 
   def days_overdue
     return 0 unless overdue?
-    
     (Date.current - due_at).to_i
   end
 
@@ -56,6 +49,10 @@ class Invoice < ApplicationRecord
   end
 
   private
+
+  def number_with_comma(number)
+    number.to_s.reverse.gsub(/(\d{3})(?=\d)/, '\\1,').reverse
+  end
 
   def generate_number
     return if number.present?
