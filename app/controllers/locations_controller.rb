@@ -53,6 +53,6 @@ class LocationsController < ApplicationController
   end
 
   def location_params
-    params.require(:location).permit(:name, :address, :city, :country, :phone, :google_place_id, :facebook_page_id, :tripadvisor_id, :latitude, :longitude)
+    params.require(:location).permit(:name, :address, :city, :country, :phone, :google_place_id, :facebook_page_id, :tripadvisor_id, :latitude, :longitude, :auto_generate_replies, :default_reply_tone, :auto_post_replies)
   end
 end

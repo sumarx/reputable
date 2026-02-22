@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_21_093534) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_22_082354) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -98,10 +98,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_21_093534) do
   create_table "locations", force: :cascade do |t|
     t.bigint "account_id", null: false
     t.string "address"
+    t.boolean "auto_generate_replies", default: true, null: false
+    t.boolean "auto_post_replies", default: false, null: false
     t.float "average_rating"
     t.string "city"
     t.string "country"
     t.datetime "created_at", null: false
+    t.string "default_reply_tone", default: "professional", null: false
     t.string "facebook_page_id"
     t.string "google_account_id"
     t.boolean "google_connected", default: false

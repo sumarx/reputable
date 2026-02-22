@@ -30,6 +30,7 @@ class Review < ApplicationRecord
 
   after_create :analyze_sentiment_async
   after_create :update_location_stats
+  after_create :auto_generate_reply_drafts
 
   def positive?
     sentiment == 'positive'
@@ -68,6 +69,13 @@ class Review < ApplicationRecord
   end
 
   private
+
+  def auto_generate_reply_drafts
+    return unless body.present?
+    return unless location.auto_generate_replies?
+
+    GenerateReplyJob.perform_later(self, location.default_reply_tone)
+  end
 
   def analyze_sentiment_async
     AnalyzeSentimentJob.perform_later(self)

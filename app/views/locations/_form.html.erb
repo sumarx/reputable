@@ -83,6 +83,49 @@
     </div>
   </div>
 
+  <!-- AI Reply Settings -->
+  <div class="border-t border-gray-200 pt-6">
+    <h3 class="text-lg font-semibold text-gray-900 mb-1">AI Reply Settings</h3>
+    <p class="text-sm text-gray-500 mb-4">Configure how AI generates and handles review replies for this location.</p>
+
+    <div class="space-y-5">
+      <!-- Auto-generate toggle -->
+      <div class="flex items-center justify-between bg-gray-50 rounded-lg p-4 border border-gray-200">
+        <div>
+          <label class="text-sm font-medium text-gray-900">Auto-generate AI replies</label>
+          <p class="text-xs text-gray-500 mt-0.5">Automatically generate reply drafts when new reviews come in</p>
+        </div>
+        <div class="relative inline-flex items-center">
+          <%= f.check_box :auto_generate_replies, class: "sr-only peer", id: "auto_generate_replies" %>
+          <label for="auto_generate_replies" class="w-11 h-6 bg-gray-300 peer-checked:bg-indigo-600 rounded-full cursor-pointer transition-colors relative after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-transform peer-checked:after:translate-x-5"></label>
+        </div>
+      </div>
+
+      <!-- Default tone -->
+      <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+        <label class="text-sm font-medium text-gray-900 block mb-2">Default Reply Tone</label>
+        <%= f.select :default_reply_tone,
+              [["Professional", "professional"], ["Friendly", "friendly"], ["Apologetic", "apologetic"]],
+              {},
+              class: "w-full sm:w-64 rounded-lg border-gray-300 text-sm" %>
+        <p class="text-xs text-gray-500 mt-1.5">The tone AI will use when generating reply drafts</p>
+      </div>
+
+      <!-- Auto-post (coming soon) -->
+      <div class="flex items-center justify-between bg-gray-50 rounded-lg p-4 border border-gray-200 opacity-60">
+        <div>
+          <label class="text-sm font-medium text-gray-900">Auto-post approved replies</label>
+          <p class="text-xs text-gray-500 mt-0.5">Automatically post replies to Google Business Profile</p>
+          <span class="inline-flex items-center mt-1 px-2 py-0.5 rounded text-xs font-medium" style="background-color: #fef3c7; color: #92400e;">Coming Soon</span>
+        </div>
+        <div class="relative inline-flex items-center">
+          <input type="checkbox" disabled class="sr-only peer" />
+          <label class="w-11 h-6 bg-gray-300 rounded-full cursor-not-allowed relative after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5"></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="flex gap-3 pt-2">
     <%= f.submit class: "inline-flex items-center px-5 py-2.5 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 cursor-pointer transition" %>
     <%= link_to "Cancel", locations_path, class: "inline-flex items-center px-5 py-2.5 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition" %>

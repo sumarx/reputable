@@ -6,6 +6,8 @@ Rails.application.routes.draw do
   get "dashboard", to: "dashboard#show"
   get "dashboard/locations", to: "dashboard#locations", as: :locations_comparison
   
+  get "reply_inbox", to: "reply_inbox#index"
+
   resources :reviews, only: [:index, :show] do
     member do
       post :generate_reply
