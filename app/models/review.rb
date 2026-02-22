@@ -74,7 +74,7 @@ class Review < ApplicationRecord
     return unless body.present?
     return unless location.auto_generate_replies?
 
-    GenerateReplyJob.perform_later(self, location.default_reply_tone)
+    GenerateReplyJob.perform_now(self, location.default_reply_tone)
   end
 
   def analyze_sentiment_async
