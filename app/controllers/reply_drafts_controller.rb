@@ -5,16 +5,16 @@ class ReplyDraftsController < ApplicationController
   def update
     redirect_url = params[:redirect_to].presence || review_path(@reply_draft.review)
     if @reply_draft.update(reply_draft_params)
-      redirect_to redirect_url, notice: "Reply draft updated."
+      redirect_to redirect_url, notice: "Reply draft updated.", status: :see_other
     else
-      redirect_to redirect_url, alert: "Could not update reply draft."
+      redirect_to redirect_url, alert: "Could not update reply draft.", status: :see_other
     end
   end
 
   def approve
     @reply_draft.update!(status: "approved")
     redirect_url = params[:redirect_to].presence || review_path(@reply_draft.review)
-    redirect_to redirect_url, notice: "Reply approved! You can now send it."
+    redirect_to redirect_url, notice: "Reply approved! You can now send it.", status: :see_other
   end
 
   def send_reply
@@ -33,10 +33,9 @@ class ReplyDraftsController < ApplicationController
     @reply_draft.update!(status: "approved")
 
     if google_success
-      redirect_to review, notice: "Reply posted to Google Business Profile successfully! ✓"
+      redirect_to review, notice: "Reply posted to Google Business Profile successfully! ✓", status: :see_other
     else
-      # Fallback: redirect to manual post page
-      redirect_to manual_post_review_path(review)
+      redirect_to manual_post_review_path(review), status: :see_other
     end
   end
 
