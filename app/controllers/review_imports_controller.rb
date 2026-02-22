@@ -31,7 +31,7 @@ class ReviewImportsController < ApplicationController
     )
 
     if review.save
-      redirect_to reviews_path, notice: "Review imported successfully."
+      redirect_to reviews_path, notice: "Review imported successfully.", status: :see_other
     else
       @locations = Current.account.locations.order(:name)
       flash.now[:alert] = "Failed to import: #{review.errors.full_messages.join(', ')}"
@@ -76,7 +76,7 @@ class ReviewImportsController < ApplicationController
 
     msg = "Imported #{created} review#{'s' unless created == 1}."
     msg += " #{errors.size} failed." if errors.any?
-    redirect_to reviews_path, notice: msg
+    redirect_to reviews_path, notice: msg, status: :see_other
   rescue CSV::MalformedCSVError => e
     @locations = Current.account.locations.order(:name)
     flash.now[:alert] = "Invalid CSV file: #{e.message}"

@@ -19,7 +19,7 @@ class LocationsController < ApplicationController
     @location = Current.account.locations.build(location_params)
     
     if @location.save
-      redirect_to @location, notice: 'Location was successfully created.'
+      redirect_to @location, notice: 'Location was successfully created.', status: :see_other
     else
       render :new, status: :unprocessable_entity
     end
@@ -30,7 +30,7 @@ class LocationsController < ApplicationController
 
   def update
     if @location.update(location_params)
-      redirect_to @location, notice: 'Location was successfully updated.'
+      redirect_to @location, notice: 'Location was successfully updated.', status: :see_other
     else
       render :edit, status: :unprocessable_entity
     end
@@ -38,12 +38,12 @@ class LocationsController < ApplicationController
 
   def sync_reviews
     SyncReviewsJob.perform_later(@location)
-    redirect_to @location, notice: "Review sync has been queued. New reviews will appear shortly."
+    redirect_to @location, notice: 'Review sync has been queued. New reviews will appear shortly.', status: :see_other
   end
 
   def destroy
     @location.destroy
-    redirect_to locations_path, notice: 'Location was successfully deleted.'
+    redirect_to locations_path, notice: 'Location was successfully deleted.', status: :see_other
   end
 
   private

@@ -12,7 +12,7 @@ class RegistrationsController < ApplicationController
 
     if @account.save && @user.save
       start_new_session_for(@user)
-      redirect_to dashboard_path, notice: "Welcome to RepuTable! Your account has been created."
+      redirect_to dashboard_path, notice: "Welcome to RepuTable! Your account has been created.", status: :see_other
     else
       render :new, status: :unprocessable_entity
     end

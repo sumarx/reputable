@@ -14,9 +14,7 @@ class ReplyInboxController < ApplicationController
     @tab = params[:tab] || "needs_reply"
     reviews = case @tab
     when "needs_reply"
-      reviews.unreplied.where(reply_drafts: { id: nil }).or(
-        reviews.unreplied.where.not(id: ReplyDraft.select(:review_id))
-      )
+      reviews.unreplied.where.not(id: ReplyDraft.where(status: "draft").select(:review_id))
     when "drafted"
       reviews.where(reply_status: %w[draft pending]).where(id: ReplyDraft.where(status: "draft").select(:review_id))
     when "sent"

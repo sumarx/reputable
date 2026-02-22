@@ -10,7 +10,7 @@ class Billing::PaymentProofsController < ApplicationController
       # Send notification email to admin
       BillingMailer.payment_proof_submitted(@payment_proof).deliver_later
       
-      redirect_to billing_invoice_path(@invoice), 
+      redirect_to billing_invoice_path(@invoice), status: :see_other, 
         notice: "Payment proof uploaded successfully. We'll review it within 24 hours."
     else
       @bank_details = {

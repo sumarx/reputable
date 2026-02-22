@@ -17,7 +17,7 @@ class SettingsController < ApplicationController
     notification_updated = @notification_settings.update(notification_params) if params[:notification_settings].present?
 
     if account_updated != false && user_updated != false && notification_updated != false
-      redirect_to settings_path, notice: "Settings updated successfully."
+      redirect_to settings_path, notice: "Settings updated successfully.", status: :see_other
     else
       render :show, status: :unprocessable_entity
     end

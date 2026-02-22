@@ -24,7 +24,7 @@ class CampaignsController < ApplicationController
     @campaign = Current.account.campaigns.build(campaign_params)
     
     if @campaign.save
-      redirect_to @campaign, notice: 'Campaign was successfully created.'
+      redirect_to @campaign, notice: 'Campaign was successfully created.', status: :see_other
     else
       @locations = Current.account.locations
       render :new, status: :unprocessable_entity
@@ -37,7 +37,7 @@ class CampaignsController < ApplicationController
 
   def update
     if @campaign.update(campaign_params)
-      redirect_to @campaign, notice: 'Campaign was successfully updated.'
+      redirect_to @campaign, notice: 'Campaign was successfully updated.', status: :see_other
     else
       @locations = Current.account.locations
       render :edit, status: :unprocessable_entity
@@ -46,7 +46,7 @@ class CampaignsController < ApplicationController
 
   def destroy
     @campaign.destroy
-    redirect_to campaigns_path, notice: 'Campaign was successfully deleted.'
+    redirect_to campaigns_path, notice: 'Campaign was successfully deleted.', status: :see_other
   end
 
   def qr_code
